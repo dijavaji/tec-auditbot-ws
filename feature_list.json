@@ -1,0 +1,115 @@
+{
+  "project": "AuditBot AI",
+  "description": "AI es un microservicio de IA que audita automaticamente las conversaciones de chatbots empresariales, detectando fallas de conocimiento, frustracion del usuario y ventas perdidas, para convertir esos hallazgos en recomendaciones de mejora accionables.",
+  "rules": {
+    "one_feature_at_a_time": true,
+    "require_tests_to_close": true,
+    "require_approved_spec_to_implement": true,
+    "valid_status": ["pending", "history_ready", "in_progress", "done", "blocked"],
+    "sdd_required_when": "feature has \"sdd\": true"
+  },
+  "features": [
+    {
+      "id": "US-01",
+      "name": "aud_push_msg",
+      "title": "Publicar solicitud de auditoría genérica",
+      "description": "**Como** sistema cliente (Smart Chatbot u otro) **Quiero** publicar un mensaje en una cola RabbitMQ genérica con las conversaciones a auditar **Para** que AuditBot AI las procese de forma asíncrona sin acoplarme a su disponibilidad",
+      "acceptance": [
+        "El mensaje se publica en el exchange `auditbot.exchange` con routing key `conversation.audit.requested`",
+        "El mensaje incluye el payload de conversación según el contrato definido (ver Contrato de Mensajes)",
+        "Si AuditBot AI no está disponible, el mensaje permanece en cola hasta ser consumido (durabilidad habilitada)"
+      ],
+      "sdd": true,
+      "status": "pending"
+    },
+    {
+      "id": "US-02",
+      "name": "aud_get_message",
+      "title": "Consumir mensajes de auditoría",
+      "description": "**Como** microservicio AuditBot AI **Quiero** consumir mensajes de la cola `conversation.audit.queue` **Para** iniciar el pipeline de análisis sobre cada conversación recibida",
+      "acceptance": [
+        "Se valida el esquema del mensaje antes de procesar (rechazo a DLQ si es inválido)",
+        "Se implementa consumidor idempotente (un `chatId` ya procesado no se vuelve a analizar salvo reintento explícito)"
+      ],
+      "sdd": true,
+      "status": "pending"
+    },
+    {
+      "id": "US-03",
+      "name": "aud_detect_gaps",
+      "title": "Detectar preguntas sin respuesta",
+      "description": "**Como** analista de soporte **Quiero** que el sistema identifique automáticamente los mensajes del usuario que el bot no supo responder **Para** saber qué contenido falta en la base de conocimiento del chatbot",
+      "acceptance": [
+        "Cada mensaje de usuario se clasifica como 'respondido' o gap 'detectado' usando el modelo de IA vía Ollama",
+        "Los gaps se agrupan por similitud/frecuencia dentro de una misma conversación",
+        "El resultado incluye el texto de la pregunta y un score de confianza de la clasificación"
+      ],
+      "sdd": true,
+      "status": "pending"
+    },
+    {
+      "id": "US-04",
+      "name": "aud_sentiment_analisys",
+      "title": "Detectar frustración del usuario",
+      "description": "**Como** responsable de experiencia del cliente **Quiero** que el sistema marque los momentos donde el usuario mostró frustración **Para** revisar esas conversaciones y mejorar el flujo conversacional",
+      "acceptance": [
+        "Cada mensaje de usuario recibe una etiqueta de sentimiento (positivo, neutral, negativo, muy negativo/frustrado)",
+        "Se calcula una tendencia de sentimiento a lo largo de la conversación (mejora o empeora)",
+        "Se marca la conversación completa con un flag `frustration_detected` si se supera un umbral configurable"
+      ],
+      "sdd": true,
+      "status": "pending"
+    },
+    {
+      "id": "US-05",
+      "name": "aud_detect_leads",
+      "title": "Identificar leads no calificados",
+      "description": "**Como** responsable de ventas **Quiero** que el sistema detecte conversaciones donde el usuario mostró intención de compra que no se concretó **Para** dar seguimiento manual a esas oportunidades",
+      "acceptance": [
+        "Se identifica intención de compra en base al contenido de los mensajes del usuario",
+        "Se determina si la conversación llegó a un cierre (dato de contacto capturado, derivación a agente, etc.)",
+        "El resultado incluye un `lead_score` y el motivo por el cual se considera oportunidad perdida"
+      ],
+      "sdd": true,
+      "status": "pending"
+    },
+    {
+      "id": "US-06",
+      "name": "aud_automatic_upturn",
+      "title": "Generar recomendaciones de mejora",
+      "description": "**Como** product owner del chatbot **Quiero** recibir sugerencias automáticas de nuevas FAQs o flujos alternativos **Para** reducir gaps y frustración futura sin análisis manual",
+      "acceptance": [
+        "Las recomendaciones se generan solo después de completar los análisis de gaps, sentimiento y leads de la conversación",
+        "Cada recomendación incluye: tipo (FAQ nueva / flujo alternativo), texto sugerido y la conversación de origen que la motivó",
+        "Las recomendaciones se persisten asociadas al `chatId` de origen"
+      ],
+      "sdd": true,
+      "status": "pending"
+    },
+    {
+      "id": "US-07",
+      "name": "aud_get_audit",
+      "title": "Consultar resultados de auditoría vía REST",
+      "description": "**Como** frontend React (dashboard) **Quiero** consultar los resultados de auditoría de una o varias conversaciones vía API REST **Para** mostrarlos en el dashboard sin necesidad de suscribirme a eventos",
+      "acceptance": [
+        "Endpoint `GET /api/v1/audits` retorna resultados paginados con filtros (rango de fecha, assistantId, tipo de hallazgo)",
+        "Endpoint `GET /api/v1/audits/{chatId}` retorna el detalle completo de una conversación auditada",
+        "Response en JSON, sin autenticación en esta versión (fuera de alcance para hackathon)"
+      ],
+      "sdd": true,
+      "status": "pending"
+    },
+    {
+      "id": "US-08",
+      "name": "aud_view_audit",
+      "title": "Ver estado de procesamiento",
+      "description": "**Como** usuario del dashboard **Quiero** ver si una conversación ya fue auditada, está en proceso o falló **Para** entender el estado del análisis sin ambigüedad",
+      "acceptance": [
+        "Cada registro de auditoría expone un campo `status`: PENDING, PROCESSING, COMPLETED, FAILED",
+        "En caso de FAILED, se expone un mensaje de error legible"
+      ],
+      "sdd": true,
+      "status": "pending"
+    }
+  ]
+}
