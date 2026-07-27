@@ -28,9 +28,12 @@ alwaysApply: true
 | `progress/current.md`        | Estado de la sesión actual                                                  | Siempre, al empezar |
 | `progress/history.md`        | Bitácora append-only de sesiones anteriores                                 | Si necesitas contexto histórico |
 | `specs/<feature>/`           | `requirements.md` + `design.md` + `tasks.md` (Kiro-style)                   | Antes de implementar cualquier feature con `"sdd": true` |
-| `tmp/<id>-enriched-us.md`    | Historia de usuario enriquecida (output del skill `refine-stories`)          | Antes de generar el spec Kiro |
-| `docs/architecture.md`       | Qué significa "hacer un buen trabajo" en este proyecto                      | Antes de implementar |
-| `docs/conventions.md`        | Reglas de estilo, nombres, estructura                                       | Antes de escribir código |
+| `tmp/<id>-enriched-us.md`    | Historia de usuario enriquecida (output del skill `refine-stories`)         | Antes de generar el spec Kiro |
+| `docs/structure.md`          | Qué significa "hacer un buen trabajo" en este proyecto                      | Antes de implementar |
+| `docs/product.md`            | qué es, usuarios, objetivos.                                                | Siempre, al empezar |
+| `docs/tech.md`               | stack, librerías, restricciones.                                                | Siempre, al empezar |
+| `docs/backend-standards.md`  | Reglas de estilo, nombres, estructura                                       | Antes de escribir código |
+| `docs/tech.md`               | modelo de datos                                                              | Antes de generar el spec Kiro |
 | `ai-specs/doc/spec.md`       | Proceso SDD: EARS notation, los 3 archivos, puerta de aprobación humana     | Antes de redactar o leer un spec |
 | `docs/verification.md`       | Cómo verificar que tu trabajo funciona (incluye trazabilidad requirements)  | Antes de declarar una tarea como `done` |
 | `CHECKPOINTS.md`             | Criterios objetivos de "estado final correcto"                              | Para auto-evaluarte |
@@ -42,7 +45,7 @@ alwaysApply: true
 ## 3. Reglas duras (no negociables)
 
 - **Una sola feature a la vez.** No mezcles cambios de varias tareas en la misma sesión.
-- **No declares una tarea `done` sin pruebas verdes.** Ejecuta `./mvn` y
+- **No declares una tarea `done` sin pruebas verdes.** Ejecuta `./mvnw clean install` y
   asegúrate de que el bloque de tests pasa al 100%.
 - **No saltes la fase de refinamiento.** Toda feature con `"sdd": true` debe
   pasar primero por el skill `refine-stories` antes de generar el spec Kiro.
@@ -77,7 +80,7 @@ pending → [refine_stories] → history_ready → ⏸ HUMANO (ejecuta spec Kiro
 
 Antes de terminar:
 
-1. Ejecuta `./init.sh` — todo verde.
+1. Ejecuta `./mvnw clean install -Dmaven.test.skip=true` — todo verde.
 2. Si la tarea está acabada: marca `status: "done"` en `feature_list.json`.
 3. Mueve el resumen de `progress/current.md` al final de `progress/history.md`.
 4. Vacía `progress/current.md` dejando solo la plantilla.
