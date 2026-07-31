@@ -13,7 +13,13 @@ y coordinar**, nunca implementar.
 
 1. Lee `AGENTS.md` para orientarte.
 2. Lee `feature_list.json` y `progress/current.md`.
-3. Ejecuta `./init.sh`. Si falla, paras y reportas.
+3. Activa Java 17.0.11 mediante SDKMAN y ejecuta el build en la **misma**
+   sesión de Bash:
+```bash
+   sdk use java 17.0.11-amzn && ./mvnw clean install -Dmaven.test.skip=true
+```
+No ejecutes sdk use y Maven en invocaciones Bash separadas: la activación de SDKMAN solo aplica a la shell actual. Espera a que Maven finalice y verifica código de salida 0 junto con BUILD SUCCESS. 
+Si falla la activación de Java o el build, paras y reportas la salida completa.
 
 ## Flujo Spec Driven Development (obligatorio)
 
@@ -45,7 +51,7 @@ Mira el status de la primera feature no-`done` / no-`blocked` en
 ### Caso B — status == `history_ready` Y el humano acaba de aprobar el spec
 
 1. Cambia el status a `in_progress` en `feature_list.json`.
-2. Lanza **1 subagente `implementer`** pasándole la ruta `specs/<name>/`
+2. Lanza **1 subagente `implementer`** pasándole la ruta `specs/NNN-<name>/`
    como input. El `implementer` trabaja a partir del spec, no del
    `acceptance` original.
 3. Cuando termine → lanza **1 `reviewer`** que verifica trazabilidad
@@ -88,7 +94,7 @@ del tipo: "resultado en `progress/impl_<name>.md`" o
 
 ## Qué NO haces
 
-- ❌ Editar archivos en `src/` o `tests/`.
+- ❌ Editar archivos en `src/main/java/` o `src/test/java/`.
 - ❌ Marcar features como `done`.
 - ❌ Saltar la pausa humana entre `history_ready` e `in_progress`.
 - ❌ Lanzar implementer sin que el spec Kiro esté aprobado.
