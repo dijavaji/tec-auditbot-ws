@@ -11,23 +11,22 @@ Base package: `ec.com.technoloqie.auditbot.api`
 
 The project follows a layered architecture inspired by Hexagonal principles. All packages live under the base package.
 
-```
-ec.com.technoloqie.auditbot.api
-├── config/          → Spring @Configuration and @Bean definitions
-├── controller/      → @RestController classes (thin HTTP handlers, no business logic)
-├── service/         → Orchestrators (write workflows) and Query Services (read-only)
-├── analyzer/        → Pure business logic (no Spring, no JPA, no messaging)
-├── integration/     → Anti-corruption layer for external systems
-│   ├── rabbitmq/   → RabbitMQ producers, consumers, config
-│   └── ollama/     → Spring AI / Ollama client wrappers
-├── repository/      → Spring Data JPA repository interfaces
-├── model/          → JPA @Entity classes (pure data containers)
-├── dto/             → Data Transfer Objects (Records or Lombok @Data)
-├── mapper/          → Entity ↔ DTO mappers (MapStruct preferred)
-├── commons/
-│   ├──exception/       → Custom exceptions + @ControllerAdvice handler
-|   └── util/            → Stateless utility/helper classes
-```
+    *   `ec.com.technoloqie.auditbot.api.dto`: Data Transfer Objects (Records or Lombok @Data)
+    *   `ec.com.technoloqie.auditbot.api.model`: JPA @Entity classes (pure data containers) Para modelos de datos. 
+    *   `ec.com.technoloqie.auditbot.api.repository`: Spring Data JPA repository interfaces
+    *   `ec.com.technoloqie.auditbot.api.repository.impl`: Para implementaciones de repository.
+    *   `ec.com.technoloqie.auditbot.api.service`: Orchestrators (write workflows) and Query Services (read-only) Para interfaces de servicios.
+    *   `ec.com.technoloqie.auditbot.api.service.impl`: Para implementaciones de servicios.
+    *   `ec.com.technoloqie.auditbot.api.analyzer`: Pure business logic (no Spring, no JPA, no messaging)
+    *   `ec.com.technoloqie.auditbot.api.integration`: Anti-corruption layer for external systems
+    *   `ec.com.technoloqie.auditbot.api.integration.rabbitmq`: RabbitMQ producers, consumers, config
+    *   `ec.com.technoloqie.auditbot.api.integration.ollama`: Spring AI / Ollama client wrappers
+    *   `ec.com.technoloqie.auditbot.api.mapper`: Entity ↔ DTO mappers (MapStruct preferred)
+    *   `ec.com.technoloqie.auditbot.api.controller`: Para controladores REST. @RestController classes (thin HTTP handlers, no business logic)
+    *   `ec.com.technoloqie.auditbot.api.config`: Spring @Configuration and @Bean definitions Para clases de configuración.
+    *   `ec.com.technoloqie.auditbot.api.commons`: Para utilidades, constantes y excepciones comunes.
+    *   `ec.com.technoloqie.auditbot.api.commons.exception` para excepciones comunes
+    *   `ec.com.technoloqie.auditbot.api.commons.util`: para utilitarios comunes
 
 ## Layer Rules
 
