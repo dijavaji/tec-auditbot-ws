@@ -60,7 +60,7 @@
 ## C6 — Spec Driven Development
 
 - [ ] Toda feature con `"sdd": true` en estado `history_ready`, `in_progress`
-      o `done` tiene su carpeta `specs/<name>/` con los 3 archivos:
+      o `done` tiene su carpeta `specs/NNN-<name>/` con los 3 archivos:
       `requirements.md`, `design.md`, `tasks.md`.
 - [ ] `requirements.md` usa EARS estricto (ver `ai-specs/doc/spec.md`).
 - [ ] Toda feature `done` con `"sdd": true` tiene todas sus tasks marcadas

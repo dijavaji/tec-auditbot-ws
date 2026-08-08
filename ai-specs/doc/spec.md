@@ -18,7 +18,7 @@ specs/<feature-name>/
 └── tasks.md                      # PASOS concretos a implementar
 ```
 
-El `feature-name` coincide con el campo `name` de `feature_list.json`.
+El `feature-name` se lo forma con `NNN-<name>` donde `name` coincide con el campo de `feature_list.json` y `NNN` con el siguiente número libre (`001`, `002`, …).
 
 ## Estados de una feature
 
@@ -50,14 +50,14 @@ pending → [refine_stories] → history_ready → ⏸ HUMANO (ejecuta spec Kiro
 
 1. El humano revisa `tmp/<id>-enriched-us.md`.
 2. El humano ejecuta el flujo de spec de Kiro (sesión Spec) que genera
-   `specs/<name>/{requirements.md, design.md, tasks.md}` a partir de la
+   `specs/NNN-<name>/{requirements.md, design.md, tasks.md}` a partir de la
    historia enriquecida.
 3. Una vez satisfecho con el spec, el humano aprueba y se transiciona el
    status a `in_progress`.
 
 ### Fase 3 — Implementación (`in_progress → done`)
 
-1. El `implementer` trabaja a partir de `specs/<name>/tasks.md`.
+1. El `implementer` trabaja a partir de `specs/NNN-<name>/tasks.md`.
 2. El `reviewer` verifica trazabilidad `R<n>` ↔ test y tasks completas.
 3. Si aprueba, se marca `done`.
 

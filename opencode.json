@@ -1,0 +1,10 @@
+{
+    "$schema": "https://opencode.ai/config.json",
+  "agent": {
+    "leader":{  
+                "mode": "primary",
+                "description": "Orquestador. Recibe la tarea principal, divide el trabajo y lanza subagentes. NUNCA escribe código directamente.",
+                "prompt": "{file:./ai-specs/agents/leader.md}"    
+            }
+  }
+}

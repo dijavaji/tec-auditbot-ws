@@ -1,5 +1,5 @@
 ---
-description: Este documento contiene todas las reglas y directrices de desarrollo para este proyecto, aplicables a todos los agentes de IA (Claude, Cursor, Codex, Gemini, etc.).
+description: Este documento contiene todas las reglas y directrices de desarrollo para este proyecto, aplicables a todos los agentes de IA (Claude, Cursor, Codex, Gemini, Kiro, OpenCode, etc.).
 alwaysApply: true
 ---
 
@@ -28,46 +28,50 @@ alwaysApply: true
 | `progress/current.md`        | Estado de la sesión actual                                                  | Siempre, al empezar |
 | `progress/history.md`        | Bitácora append-only de sesiones anteriores                                 | Si necesitas contexto histórico |
 | `specs/<feature>/`           | `requirements.md` + `design.md` + `tasks.md` (Kiro-style)                   | Antes de implementar cualquier feature con `"sdd": true` |
-| `tmp/<id>-enriched-us.md`    | Historia de usuario enriquecida (output del skill `refine-stories`)         | Antes de generar el spec Kiro |
-| `docs/structure.md`          | Qué significa "hacer un buen trabajo" en este proyecto                      | Antes de implementar |
-| `docs/product.md`            | qué es, usuarios, objetivos.                                                | Siempre, al empezar |
-| `docs/tech.md`               | stack, librerías, restricciones.                                                | Siempre, al empezar |
-| `docs/backend-standards.md`  | Reglas de estilo, nombres, estructura                                       | Antes de escribir código |
-| `docs/tech.md`               | modelo de datos                                                              | Antes de generar el spec Kiro |
-| `ai-specs/doc/spec.md`       | Proceso SDD: EARS notation, los 3 archivos, puerta de aprobación humana     | Antes de redactar o leer un spec |
-| `docs/verification.md`       | Cómo verificar que tu trabajo funciona (incluye trazabilidad requirements)  | Antes de declarar una tarea como `done` |
+| `tmp/<id>-enriched-us.md`    | Historia de usuario enriquecida (output del skill `refine-stories`)         | Antes de generar el spec |
+| `docs/structure.md`          | Arquitectura, paquetes, flujo de dependencias                               | Antes de implementar |
+| `docs/product.md`            | Qué es el producto, usuarios, objetivos                                     | Siempre, al empezar |
+| `docs/tech.md`               | Stack, librerías, restricciones, modelo de datos                            | Siempre, al empezar |
+| `docs/backend-standards.md`  | Reglas de estilo, nombres, estructura, testing                              | Antes de escribir código |
+| `docs/verification.md`       | Cómo verificar que tu trabajo funciona (niveles de testing, trazabilidad)   | Antes de declarar una tarea como `done` |
+| `docs/data-model.md`         | Modelo de datos                                                              | Antes de generar el spec |
 | `CHECKPOINTS.md`             | Criterios objetivos de "estado final correcto"                              | Para auto-evaluarte |
+| `ai-specs/doc/spec.md`       | Proceso SDD: EARS notation, los 3 archivos, puerta de aprobación humana     | Antes de redactar o leer un spec |
 | `ai-specs/agents/`           | Definiciones de subagentes (`leader`, `implementer`, `reviewer`)            | Si orquestas trabajo |
-| `.kiro/skills/`              | Skills de Kiro (`refine-stories`)                                           | Para refinar historias de usuario |
-| `src/`                       | Código de la aplicación                                                     | Para implementar |
-| `tests/`                     | Tests automáticos                                                           | Para verificar |
+| `ai-specs/skills/`           | Skills reutilizables (`refine-stories`)                                     | Para refinar historias de usuario |
+| `src/main/java/`             | Código de la aplicación                                                     | Para implementar |
+| `src/test/java/`             | Tests automáticos (JUnit 5, Mockito, Testcontainers)                        | Para verificar |
+| `pom.xml`                    | Dependencias Maven y configuración de build                                 | Si necesitas agregar dependencias |
 
 ## 3. Reglas duras (no negociables)
 
 - **Una sola feature a la vez.** No mezcles cambios de varias tareas en la misma sesión.
-- **No declares una tarea `done` sin pruebas verdes.** Ejecuta `./mvnw clean install` y
-  asegúrate de que el bloque de tests pasa al 100%.
+- **No declares una tarea `done` sin pruebas verdes.** Ejecuta `./mvnw clean verify` y
+  asegúrate de que todos los tests pasan al 100%.
 - **No saltes la fase de refinamiento.** Toda feature con `"sdd": true` debe
-  pasar primero por el skill `refine-stories` antes de generar el spec Kiro.
+  pasar primero por el skill `refine-stories` antes de generar el spec.
 - **No saltes la puerta de aprobación humana.** El leader detiene el flujo
   en `history_ready` y espera a que el humano ejecute y apruebe el spec.
 - **Documenta lo que haces** en `progress/current.md` mientras trabajas, no al final.
 - **Deja el repositorio limpio** antes de cerrar la sesión (ver §5).
 - **Si no sabes algo, busca en `docs/`** antes de inventarlo.
+- **Constructor injection únicamente** — nunca `@Autowired` en fields.
+- **Analyzers son lógica pura** — no importan Spring, JPA ni RabbitMQ.
+- **Controllers delgados** — sin lógica de negocio, sin acceso directo a repository.
 
 ## 4. Flujo de trabajo (SDD)
 
 ```
-pending → [refine_stories] → history_ready → ⏸ HUMANO (ejecuta spec Kiro) → in_progress → [implementer → reviewer] → done
+pending → [refine_stories] → history_ready → ⏸ HUMANO (ejecuta spec) → in_progress → [implementer → reviewer] → done
 ```
 
 1. El leader detecta la primera feature `pending` con `"sdd": true`.
-2. El leader (o el humano) invoca el skill `/refine-stories <id>`, 
+2. El leader (o el humano) invoca el skill `refine-stories <id>`,
    que enriquece la historia y genera `tmp/<id>-enriched-us.md`.
 3. El skill marca el status como `history_ready`.
 4. **Pausa.** El humano revisa la historia enriquecida y ejecuta el flujo
-   de spec de Kiro (sesión Spec) utilizando la historia enriquecida `tmp/<id>-enriched-us.md` para generar
-   `specs/<name>/{requirements,design,tasks}.md`.
+   de spec (sesión Spec) utilizando la historia enriquecida `tmp/<id>-enriched-us.md` para generar
+   `specs/NNN-<name>/{requirements,design,tasks}.md` con el siguiente número libre (`001`, `002`, …).
 5. Una vez aprobado el spec, el humano indica "aprobado" y el leader cambia
    el status a `in_progress` y lanza `implementer`.
 6. El implementer ejecuta `tasks.md` una a una, marcándolas `[x]`.
@@ -80,14 +84,15 @@ pending → [refine_stories] → history_ready → ⏸ HUMANO (ejecuta spec Kiro
 
 Antes de terminar:
 
-1. Ejecuta `./mvnw clean install -Dmaven.test.skip=true` — todo verde.
+1. Ejecuta `./mvnw clean verify` — todo verde.
 2. Si la tarea está acabada: marca `status: "done"` en `feature_list.json`.
 3. Mueve el resumen de `progress/current.md` al final de `progress/history.md`.
 4. Vacía `progress/current.md` dejando solo la plantilla.
-5. No dejes archivos temporales, ni `print()` de debug, ni TODOs sin contexto.
+5. No dejes archivos temporales, ni `System.out.println()` de debug, ni TODOs sin contexto.
 
 ## 6. Si te bloqueas
 
 - Relee la sección relevante de `docs/`.
 - Si la herramienta no hace lo que esperas, **no inventes un workaround**:
   documenta el bloqueo en `progress/current.md` y para la sesión.
+- Marca `"status": "blocked"` en `feature_list.json` con la razón en `progress/current.md`.
