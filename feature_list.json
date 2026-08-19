@@ -20,7 +20,7 @@
         "Si AuditBot AI no está disponible, el mensaje permanece en cola hasta ser consumido (durabilidad habilitada)"
       ],
       "sdd": true,
-      "status": "history_ready"
+      "status": "done"
     },
     {
       "id": "US-02",
