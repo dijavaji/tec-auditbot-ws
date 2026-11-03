@@ -234,3 +234,72 @@ Ningún valor real de host, usuario, contraseña o certificado se versiona en el
 - Consumo del mensaje, validación previa a DLQ e idempotencia de consumo (`US-02`).
 - Ejecución de analyzers de IA y persistencia de resultados de auditoría.
 - Cifrado de campos dentro del payload.
+
+---
+
+# Contrato operativo del consumo de auditoría (US-02)
+
+Este contrato documenta el consumo de solicitudes de auditoría desde la cola `conversation.audit.queue`, la topología de dead-letter, la persistencia en `audit_result`, la idempotencia at-least-once y la gestión de reintentos.
+
+## 1. Topología de Dead-Letter y Consumo AMQP
+
+| Elemento | Valor | Propiedad de configuración |
+|---|---|---|
+| Exchange principal | `auditbot.exchange` (direct, durable) | `auditbot.messaging.exchange` |
+| Routing key principal | `conversation.audit.requested` | `auditbot.messaging.routing-key` |
+| Cola principal | `conversation.audit.queue` (durable, DLX configurado) | `auditbot.messaging.queue` |
+| Dead Letter Exchange (DLX) | `auditbot.dlx` (direct, durable) | `auditbot.messaging.dead-letter-exchange` |
+| Cola DLQ | `conversation.audit.dlq` (durable, sin argumentos DLX) | `auditbot.messaging.dead-letter-queue` |
+| Routing key DLQ | `conversation.audit.failed` | `auditbot.messaging.dead-letter-routing-key` |
+
+La cola principal `conversation.audit.queue` se declara con los argumentos `x-dead-letter-exchange = auditbot.dlx` y `x-dead-letter-routing-key = conversation.audit.failed`.
+
+### Paso operativo de migración de cola
+Si la cola `conversation.audit.queue` preexistía en el broker sin argumentos de dead-letter, RabbitMQ rechaza el arranque con error `406 PRECONDITION_FAILED`. El paso operativo consiste en:
+1. Verificar que la cola esté vacía (`messages = 0`).
+2. Eliminar la cola existente.
+3. Arrancar el servicio para que `RabbitAdmin` la redeclare automáticamente con los argumentos de dead-lettering.
+
+## 2. Cabeceras de Diagnóstico en la DLQ
+
+Los mensajes enrutados a `conversation.audit.dlq` no modifican el cuerpo original y viajan acompañados de las siguientes cabeceras AMQP de diagnóstico:
+
+| Header | Tipo | Descripción |
+|---|---|---|
+| `x-audit-failure-reason` | String | Código de fallo: `MALFORMED_JSON`, `INVALID_SCHEMA`, `OVERSIZED_PAYLOAD`, `REDELIVERY_LIMIT_REACHED` |
+| `x-audit-invalid-fields` | String (opcional) | Lista separada por comas con las rutas de campos inválidos (solo en `INVALID_SCHEMA`) |
+| `x-audit-failed-at` | Instant ISO-8601 UTC | Instante de enrutamiento a la DLQ según el reloj del sistema |
+| `x-death` | List / Map | Metadatos estándar de RabbitMQ con contador de entregas y rechazos |
+
+## 3. Modelo de Persistencia de Control (`audit_result`)
+
+La tabla `audit_result` actúa como entidad raíz de control del pipeline de auditoría.
+
+### Catálogo de Estados (`AuditStatus`)
+- `PENDING`: Conversación admitida por primera vez, claim registrado.
+- `PROCESSING`: Pipeline de auditoría iniciado sobre la conversación.
+- `COMPLETED`: Auditoría finalizada exitosamente (establecido por US-06).
+- `FAILED`: Conversación aparcada o fallida definitivamente sin más reintentos.
+
+### Restricción de Unicidad e Idempotencia
+- Tabla: `audit_result` con constraint `CONSTRAINT uk_audit_result_chat_id UNIQUE (chat_id)`.
+- Índice: `CREATE INDEX idx_audit_result_status ON audit_result (status)`.
+- Semántica **at-least-once**:
+  - **Primera admisión**: Inserta el registro en `PENDING` y lo promueve a `PROCESSING`.
+  - **Duplicado sin reintento**: La inserción atómica detecta la violación de `uk_audit_result_chat_id`. Si el registro existente está en `PENDING`, `PROCESSING` o `COMPLETED`, el mensaje se descarta silenciosamente con acuse de recibo y log `WARN`, sin enviarse a la DLQ.
+  - **Reintento explícito** (`x-audit-retry = true`):
+    - Si el registro existente está en `FAILED` o `COMPLETED`: se promueve a `PROCESSING`, se incrementa `attempt_count`, se limpia `error_message` y se actualiza `updated_date`.
+    - Si el registro está en `PROCESSING`: se rechaza el reintento para evitar concurrencia y se descarta con log `WARN`.
+
+## 4. Configuración y Entornos
+
+El servicio requiere la variable de entorno `PROFILE` (`local` o `prod`): `spring.profiles.active=${PROFILE}`.
+
+### Variables de entorno del Datasource
+| Propiedad | Variable de entorno | Default en local |
+|---|---|---|
+| `spring.datasource.url` | `MYSQL_URL` | `jdbc:mysql://127.0.0.1:3306/db_desarrollo?...` |
+| `spring.datasource.username` | `MYSQL_USERNAME` | `desarrollo` |
+| `spring.datasource.password` | `MYSQL_PASSWORD` | `desarrollo` |
+| `spring.jpa.hibernate.ddl-auto` | — | `validate` |
+| `spring.flyway.enabled` | — | `true` (migraciones bajo `db/migration`) |

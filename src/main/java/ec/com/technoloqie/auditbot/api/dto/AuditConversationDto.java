@@ -15,7 +15,7 @@ import java.util.List;
  * @param chatId      identificador de la conversación auditada
  * @param assistantId identificador del asistente de IA que participó en la conversación
  * @param startedAt   instante de inicio de la conversación
- * @param endedAt      instante de fin de la conversación, puede ser nulo si aún no ha finalizado
+ * @param endedAt     instante de fin de la conversación, puede ser nulo si aún no ha finalizado
  * @param messages    lista ordenada cronológicamente de mensajes de la conversación
  */
 public record AuditConversationDto(
@@ -25,12 +25,7 @@ public record AuditConversationDto(
         Instant endedAt,
         List<AuditMessageDto> messages) {
 
-    public AuditConversationDto(String chatId, String assistantId, Instant startedAt, Instant endedAt,
-            List<AuditMessageDto> messages) {
-        this.chatId = chatId;
-        this.assistantId = assistantId;
-        this.startedAt = startedAt;
-        this.endedAt = endedAt;
-        this.messages = messages == null ? null : List.copyOf(messages);
+    public AuditConversationDto {
+        messages = messages == null ? null : List.copyOf(messages);
     }
 }

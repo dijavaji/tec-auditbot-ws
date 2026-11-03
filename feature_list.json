@@ -32,7 +32,7 @@
         "Se implementa consumidor idempotente (un `chatId` ya procesado no se vuelve a analizar salvo reintento explícito)"
       ],
       "sdd": true,
-      "status": "history_ready"
+      "status": "done"
     },
     {
       "id": "US-03",

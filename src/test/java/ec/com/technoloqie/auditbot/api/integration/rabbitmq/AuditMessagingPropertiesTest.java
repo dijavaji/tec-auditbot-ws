@@ -53,6 +53,39 @@ class AuditMessagingPropertiesTest {
         });
     }
 
+    @Test
+    void shouldUseDefaultDeadLetterTopology() {
+        contextRunner.run(context -> {
+            AuditMessagingProperties properties = context.getBean(AuditMessagingProperties.class);
+            assertThat(properties.getDeadLetterExchange()).isEqualTo("auditbot.dlx");
+            assertThat(properties.getDeadLetterQueue()).isEqualTo("conversation.audit.dlq");
+            assertThat(properties.getDeadLetterRoutingKey()).isEqualTo("conversation.audit.failed");
+        });
+    }
+
+    @Test
+    void shouldBindCustomDeadLetterTopology() {
+        contextRunner
+                .withPropertyValues(
+                        "auditbot.messaging.dead-letter-exchange=custom.dlx",
+                        "auditbot.messaging.dead-letter-queue=custom.dlq",
+                        "auditbot.messaging.dead-letter-routing-key=custom.failed")
+                .run(context -> {
+                    AuditMessagingProperties properties = context.getBean(AuditMessagingProperties.class);
+                    assertThat(properties.getDeadLetterExchange()).isEqualTo("custom.dlx");
+                    assertThat(properties.getDeadLetterQueue()).isEqualTo("custom.dlq");
+                    assertThat(properties.getDeadLetterRoutingKey()).isEqualTo("custom.failed");
+                });
+    }
+
+    @Test
+    void shouldUseThreeDefaultMaxRedeliveries() {
+        contextRunner.run(context -> {
+            AuditMessagingProperties properties = context.getBean(AuditMessagingProperties.class);
+            assertThat(properties.getMaxRedeliveries()).isEqualTo(3);
+        });
+    }
+
     @Configuration
     @EnableConfigurationProperties(AuditMessagingProperties.class)
     static class TestConfig {
