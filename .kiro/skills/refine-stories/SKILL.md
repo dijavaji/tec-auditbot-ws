@@ -1,1 +1,1 @@
-../../.agents/skill/refine-stories/SKILL.md
+../../.agents/skills/refine-stories/SKILL.md
