@@ -5,17 +5,17 @@
 
 ## Fase 1 — Modelo de datos y persistencia
 
-- [ ] **T1 — Crear la migración Flyway `V2__create_audit_gap.sql`.**
+- [x] **T1 — Crear la migración Flyway `V2__create_audit_gap.sql`.**
   - Crear `src/main/resources/db/migration/V2__create_audit_gap.sql` con la definición de la tabla `audit_gap`, primary key `gap_id`, foreign key `fk_audit_gap_audit_result` con `ON DELETE CASCADE` hacia `audit_result(audit_id)` e índice `idx_audit_gap_audit_id`.
   - **Cubre:** R19.
 
-- [ ] **T2 — Crear entidad `AuditGap`, mapeo relacional y repositorio `IAuditGapRepository`.**
+- [x] **T2 — Crear entidad `AuditGap`, mapeo relacional y repositorio `IAuditGapRepository`.**
   - Crear `model/AuditGap.java` con anotaciones JPA (`@Entity`, `@Table`, `@Id`), campos `gapId`, `auditResult` (`@ManyToOne`), `messageId`, `questionText`, `confidenceScore` (`BigDecimal`), `createdDate` (`Instant`).
   - Crear `repository/IAuditGapRepository.java` extendiendo `JpaRepository<AuditGap, String>` con `List<AuditGap> findByAuditResult_AuditId(String auditId)` y `void deleteByAuditResult_AuditId(String auditId)`.
   - Opcionalmente en `AuditResult.java` mapear `@OneToMany(mappedBy = "auditResult", cascade = CascadeType.ALL)` defensivo.
   - **Cubre:** R20, R21.
 
-- [ ] **T3 — Crear pruebas de integración para el repositorio `AuditGapRepositoryTest`.**
+- [x] **T3 — Crear pruebas de integración para el repositorio `AuditGapRepositoryTest`.**
   - Crear `src/test/java/ec/com/technoloqie/auditbot/api/repository/AuditGapRepositoryTest.java` con `@DataJpaTest` y H2 en modo MySQL.
   - Verificar inserción, clave foránea hacia `audit_result`, búsqueda por `auditId`, cascada de borrado y eliminación por `auditId`.
   - **Cubre:** R19, R20, R21.
@@ -24,14 +24,14 @@
 
 ## Fase 2 — DTOs y Analizador de Negocio Puro
 
-- [ ] **T4 — Crear DTOs para turnos de conversación y gaps.**
+- [x] **T4 — Crear DTOs para turnos de conversación y gaps.**
   - Crear `dto/ConversationTurnDto.java` (record: `userMessageId`, `userQuestion`, `assistantMessageId`, `assistantResponse`).
   - Crear `dto/KnowledgeGapCandidateDto.java` (record: `messageId`, `questionText`, `isGap`, `confidenceScore`, `reason`).
   - Crear `dto/GapAnalysisResponseDto.java` (record: `List<KnowledgeGapCandidateDto> classifications`).
   - Crear `dto/KnowledgeGapItemDto.java` (record: `messageId`, `questionText`, `confidenceScore`, `occurrencesCount`).
   - **Cubre:** R3, R7, R16, R17.
 
-- [ ] **T5 — Implementar `KnowledgeGapAnalyzer` (lógica de dominio pura).**
+- [x] **T5 — Implementar `KnowledgeGapAnalyzer` (lógica de dominio pura).**
   - Crear `analyzer/KnowledgeGapAnalyzer.java` libre de dependencias de Spring, JPA, AMQP y AI.
   - Implementar normalización léxica (minúsculas, diacríticos, puntuación).
   - Implementar tokenización y remoción de stopwords en español.
@@ -39,7 +39,7 @@
   - Implementar agrupación greedy determinista, selección de primer `messageId`, pregunta canónica más informativa y score máximo.
   - **Cubre:** R9, R10, R11, R12, R13, R14, R15, R16, R17, R18, R34.
 
-- [ ] **T6 — Crear pruebas unitarias exhaustivas en `KnowledgeGapAnalyzerTest`.**
+- [x] **T6 — Crear pruebas unitarias exhaustivas en `KnowledgeGapAnalyzerTest`.**
   - Crear `src/test/java/ec/com/technoloqie/auditbot/api/analyzer/KnowledgeGapAnalyzerTest.java` (JUnit 5 puro sin contexto Spring).
   - Cubrir: normalización, stopwords, cálculo exacto de Jaccard, descarte por confianza inferior a `min-confidence`, agrupación por similitud $\ge 0.70$, selección de pregunta canónica, preservación del primer `messageId`, y listas vacías.
   - **Cubre:** R9, R10, R11, R12, R13, R14, R15, R16, R17, R18, R34.

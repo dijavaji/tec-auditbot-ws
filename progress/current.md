@@ -4,23 +4,28 @@
 > Mientras trabajas, **mantenlo actualizado en tiempo real**, no al final.
 
 - **Feature en curso:** US-03 — Detectar preguntas sin respuesta (`aud_detect_gaps`)
-- **Fase:** spec (completada, lista para aprobación de spec)
+- **Fase:** in_progress (Fase 2 completada, iniciando Fase 3: Integración OpenAI / Spring AI)
 - **Inicio:** 2026-11-17
-- **Agente:** spec-generator
+- **Agente:** implementer
 
 ## Plan
 
-1. [x] Refinar historia enriquecida `tmp/US-03-enriched-us.md` con compatibilidad OpenAI (Spring AI) y endpoint Ollama.
-2. [x] Generar `specs/003-aud_detect_gaps/requirements.md` en notación EARS estricta (R1 a R37).
-3. [x] Generar `specs/003-aud_detect_gaps/design.md` con arquitectura por capas, decisiones y alternativas.
-4. [x] Generar `specs/003-aud_detect_gaps/tasks.md` con checklist ejecutable (T1 a T14) y trazabilidad.
-5. [ ] Esperar aprobación humana del spec para transicionar status a `in_progress` e iniciar la implementación.
+1. [x] Refinar historia enriquecida `tmp/US-03-enriched-us.md`.
+2. [x] Generar spec `003-aud_detect_gaps` (`requirements.md`, `design.md`, `tasks.md`).
+3. [x] Fase 1: Persistencia (T1: Flyway V2, T2: Entidad AuditGap y Repositorio, T3: Test de repositorio).
+4. [x] Fase 2: DTOs y Analizador puro (T4: DTOs, T5: `KnowledgeGapAnalyzer`, T6: `KnowledgeGapAnalyzerTest`).
+5. [ ] Fase 3: Integración OpenAI / Spring AI (T7, T8).
+6. [ ] Fase 4: Orquestación y Servicio (T9, T10, T11, T12).
+7. [ ] Fase 5: Reglas ArchUnit y verificación general (T13, T14).
 
 ## Bitácora
 
-- Generado spec completo en `specs/003-aud_detect_gaps/` (`requirements.md`, `design.md`, `tasks.md`).
-- Estado de la feature en `feature_list.json`: `history_ready`.
+- Completadas tareas T4, T5 y T6 de la Fase 2.
+- DTOs inmutables creados: `ConversationTurnDto`, `KnowledgeGapCandidateDto`, `GapAnalysisResponseDto`, `KnowledgeGapItemDto`.
+- `KnowledgeGapAnalyzer` implementado como POJO puro (normalización diacrítica, tokenización, stopwords en español, Jaccard similarity y agrupación determinista con preservación del primer messageId y pregunta canónica).
+- Pruebas unitarias en `KnowledgeGapAnalyzerTest` pasando al 100% (7/7 tests).
+- `ArchitectureRulesTest` pasando al 100% (11/11 tests).
 
 ## Próximo paso
 
-Revisión y aprobación humana del spec para iniciar la fase de implementación (`in_progress`).
+Iniciar Fase 3 (T7: `IKnowledgeGapAiClient` y `OpenAiKnowledgeGapAdapter`, T8: `OpenAiKnowledgeGapAdapterTest`).
