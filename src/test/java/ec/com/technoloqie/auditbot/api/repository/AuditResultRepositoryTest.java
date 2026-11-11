@@ -37,7 +37,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
         "spring.rabbitmq.username=rabbitmq",
         "spring.rabbitmq.password=Password.1",
         "spring.rabbitmq.listener.simple.auto-startup=false",
-        "spring.ai.ollama.base-url=http://localhost:11434"
+        "spring.ai.openai.api-key=ollama",
+        "spring.ai.openai.chat.base-url=http://localhost:11434/v1"
 })
 @Transactional
 class AuditResultRepositoryTest {

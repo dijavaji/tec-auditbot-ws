@@ -20,7 +20,7 @@ The project follows a layered architecture inspired by Hexagonal principles. All
     *   `ec.com.technoloqie.auditbot.api.analyzer`: Pure business logic (no Spring, no JPA, no messaging)
     *   `ec.com.technoloqie.auditbot.api.integration`: Anti-corruption layer for external systems
     *   `ec.com.technoloqie.auditbot.api.integration.rabbitmq`: RabbitMQ producers, consumers, config
-    *   `ec.com.technoloqie.auditbot.api.integration.ollama`: Spring AI / Ollama client wrappers
+    *   `ec.com.technoloqie.auditbot.api.integration.openai`: Spring AI OpenAI-compatible client wrappers (Ollama / OpenAI API)
     *   `ec.com.technoloqie.auditbot.api.mapper`: Entity ↔ DTO mappers (MapStruct preferred)
     *   `ec.com.technoloqie.auditbot.api.controller`: Para controladores REST. @RestController classes (thin HTTP handlers, no business logic)
     *   `ec.com.technoloqie.auditbot.api.config`: Spring @Configuration and @Bean definitions Para clases de configuración.

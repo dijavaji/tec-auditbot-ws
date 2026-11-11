@@ -10,7 +10,7 @@ inclusion: always # siempre
 | Language | Java 17 |
 | Framework | Spring Boot 4.x |
 | Web | Spring MVC (`spring-boot-starter-webmvc`) |
-| AI | Spring AI 2.0 with Ollama (`spring-ai-starter-model-ollama`) |
+| AI | Spring AI 2.0 with OpenAI Starter (`spring-ai-starter-model-openai`, compatible con API Ollama / OpenAI) |
 | Boilerplate | Lombok (annotation processor configured in Maven) |
 | Build | Maven (wrapper: `./mvnw`) |
 | Testing | JUnit 5, `spring-boot-starter-webmvc-test` |

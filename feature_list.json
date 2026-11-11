@@ -45,7 +45,7 @@
         "El resultado incluye el texto de la pregunta y un score de confianza de la clasificación"
       ],
       "sdd": true,
-      "status": "pending"
+      "status": "history_ready"
     },
     {
       "id": "US-04",

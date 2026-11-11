@@ -48,7 +48,8 @@ import static org.awaitility.Awaitility.await;
         "spring.rabbitmq.port=5672",
         "spring.rabbitmq.username=rabbitmq",
         "spring.rabbitmq.password=Password.1",
-        "spring.ai.ollama.base-url=http://localhost:11434",
+        "spring.ai.openai.api-key=ollama",
+        "spring.ai.openai.chat.base-url=http://localhost:11434/v1",
         "spring.rabbitmq.listener.simple.retry.enabled=false"
 })
 class ConversationAuditMessageListenerIntegrationTest {
