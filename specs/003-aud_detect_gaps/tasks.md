@@ -48,14 +48,14 @@
 
 ## Fase 3 — Integración OpenAI con Spring AI (Ollama compatible)
 
-- [ ] **T7 — Crear puerto `IKnowledgeGapAiClient` y adaptador `OpenAiKnowledgeGapAdapter`.**
+- [x] **T7 — Crear puerto `IKnowledgeGapAiClient` y adaptador `OpenAiKnowledgeGapAdapter`.**
   - Crear `integration/openai/IKnowledgeGapAiClient.java`.
   - Crear `integration/openai/OpenAiKnowledgeGapAdapter.java` inyectando `ChatClient.Builder` y timeout configurable (`auditbot.ai.openai.timeout-seconds`).
   - Configurar system prompt estricto y llamada con structured output a `GapAnalysisResponseDto`.
   - Confinar los componentes de Spring AI exclusivamente a `ec.com.technoloqie.auditbot.api.integration.openai`.
   - **Cubre:** R5, R6, R7, R8, R28, R35, R36.
 
-- [ ] **T8 — Crear pruebas unitarias para el adaptador en `OpenAiKnowledgeGapAdapterTest`.**
+- [x] **T8 — Crear pruebas unitarias para el adaptador en `OpenAiKnowledgeGapAdapterTest`.**
   - Crear `src/test/java/ec/com/technoloqie/auditbot/api/integration/openai/OpenAiKnowledgeGapAdapterTest.java` con Mockito.
   - Mockear el comportamiento de `ChatClient` y `ChatClient.Builder`.
   - Verificar: inclusión del system prompt, mapeo de turnos de diálogo, deserialización correcta de JSON estructurado, descarte de turnos `isGap = false`, y manejo de timeout.
