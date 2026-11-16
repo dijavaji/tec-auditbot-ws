@@ -14,7 +14,7 @@ class NoOpAuditPipelineTriggerTest {
     @Test
     void shouldDoNothingOnTrigger() {
         // No debe lanzar ninguna excepción ni producir efectos secundarios
-        assertThatCode(() -> trigger.trigger("chat-123"))
+        assertThatCode(() -> trigger.trigger("chat-123", null))
                 .doesNotThrowAnyException();
     }
 }

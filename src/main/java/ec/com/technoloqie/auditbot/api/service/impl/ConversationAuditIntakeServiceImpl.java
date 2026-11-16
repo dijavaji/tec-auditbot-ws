@@ -98,8 +98,8 @@ public class ConversationAuditIntakeServiceImpl implements IConversationAuditInt
             throw new AuditProcessingException(chatId, "Error de acceso a datos al promover el claim", ex);
         }
 
-        // e) Disparar pipeline (no-op en US-02)
-        auditPipelineTrigger.trigger(chatId);
+        // e) Disparar pipeline
+        auditPipelineTrigger.trigger(chatId, request.conversation());
 
         return new AuditIntakeResultDto(AuditIntakeOutcome.ADMITTED, chatId, claim.getAuditId());
     }
@@ -140,7 +140,7 @@ public class ConversationAuditIntakeServiceImpl implements IConversationAuditInt
                 throw new AuditProcessingException(chatId, "Error de acceso a datos al reprocesar el claim", ex);
             }
 
-            auditPipelineTrigger.trigger(chatId);
+            auditPipelineTrigger.trigger(chatId, request.conversation());
             return new AuditIntakeResultDto(AuditIntakeOutcome.RETRY_ADMITTED, chatId, record.getAuditId());
         }
 

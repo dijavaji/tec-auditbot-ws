@@ -1,5 +1,6 @@
 package ec.com.technoloqie.auditbot.api.config;
 
+import ec.com.technoloqie.auditbot.api.analyzer.KnowledgeGapAnalyzer;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.context.annotation.Bean;
@@ -17,5 +18,10 @@ public class OpenAiConfiguration {
         return builder
                 .defaultOptions(OpenAiChatOptions.builder().temperature(0.1))
                 .build();
+    }
+
+    @Bean
+    public KnowledgeGapAnalyzer knowledgeGapAnalyzer() {
+        return new KnowledgeGapAnalyzer();
     }
 }

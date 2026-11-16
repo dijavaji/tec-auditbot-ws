@@ -65,14 +65,14 @@
 
 ## Fase 4 — Orquestación, Servicio y Refinamiento del Trigger
 
-- [ ] **T9 — Refinar la interfaz y fallback de `IAuditPipelineTrigger`.**
+- [x] **T9 — Refinar la interfaz y fallback de `IAuditPipelineTrigger`.**
   - Actualizar `service/IAuditPipelineTrigger.java` a la firma: `void trigger(String chatId, AuditConversationDto conversation)`.
   - Actualizar `service/impl/NoOpAuditPipelineTrigger.java` con la nueva firma y marcarlo con `@ConditionalOnMissingBean(IAuditPipelineTrigger.class)` o prioridad inferior.
   - Actualizar `service/impl/ConversationAuditIntakeServiceImpl.java` para pasar `request.conversation()` en la invocación de `trigger`.
   - Actualizar `src/test/java/ec/com/technoloqie/auditbot/api/service/impl/ConversationAuditIntakeServiceImplTest.java` y `NoOpAuditPipelineTriggerTest.java`.
   - **Cubre:** R1, R3, R4.
 
-- [ ] **T10 — Crear servicio `IKnowledgeGapService` e implementación transaccional `KnowledgeGapServiceImpl`.**
+- [x] **T10 — Crear servicio `IKnowledgeGapService` e implementación transaccional `KnowledgeGapServiceImpl`.**
   - Crear `service/IKnowledgeGapService.java` con `void analyzeAndPersistGaps(String chatId, AuditConversationDto conversation)`.
   - Crear `service/impl/KnowledgeGapServiceImpl.java` con `@Service` y `@Transactional`.
   - Implementar reconstrucción de turnos cronológicos emparejando `USER` con `ASSISTANT`, descartando `SYSTEM` y soportando turnos sin respuesta final.
@@ -85,12 +85,12 @@
   - Emitir log estructurado con `etapa=GAP_DETECTION`.
   - **Cubre:** R1, R2, R3, R4, R22, R23, R24, R25, R26, R27, R29, R30, R31, R32, R33, R36.
 
-- [ ] **T11 — Implementar orquestador del pipeline `AuditPipelineOrchestratorImpl`.**
+- [x] **T11 — Implementar orquestador del pipeline `AuditPipelineOrchestratorImpl`.**
   - Crear `service/impl/AuditPipelineOrchestratorImpl.java` implementando `IAuditPipelineTrigger` con `@Service` y `@Primary`.
   - Invocar `IKnowledgeGapService.analyzeAndPersistGaps(chatId, conversation)`.
   - **Cubre:** R1, R31.
 
-- [ ] **T12 — Crear pruebas unitarias completas en `KnowledgeGapServiceImplTest`.**
+- [x] **T12 — Crear pruebas unitarias completas en `KnowledgeGapServiceImplTest`.**
   - Crear `src/test/java/ec/com/technoloqie/auditbot/api/service/impl/KnowledgeGapServiceImplTest.java` con Mockito y reloj controlado.
   - Probar: extracción de turnos en orden cronológico, filtrado de mensajes `SYSTEM`, turnos de usuario sin respuesta, persistencia de gaps y actualización de `AuditResult` en `PROCESSING`, caso con 0 gaps detectados, reemplazo de gaps en reintento, captura de excepción del cliente LLM con actualización a `FAILED` y `errorMessage` truncado, y emisión de log estructurado sin PII.
   - **Cubre:** R1, R2, R3, R4, R22, R23, R24, R25, R26, R27, R29, R30, R31, R32, R33.
@@ -99,7 +99,7 @@
 
 ## Fase 5 — Reglas de Arquitectura y Verificación Integral
 
-- [ ] **T13 — Actualizar y extender `ArchitectureRulesTest` con ArchUnit.**
+- [x] **T13 — Actualizar y extender `ArchitectureRulesTest` con ArchUnit.**
   - En `src/test/java/ec/com/technoloqie/auditbot/api/ArchitectureRulesTest.java`:
     - Ajustar `shouldKeepConsumptionIndependentFromAnalyzers` para que la restricción aplique a `integration.rabbitmq..` y al flujo de admisión, permitiendo que `service.impl` invoque a `analyzer..`.
     - Agregar regla `shouldKeepKnowledgeGapAnalyzerPure`: verificar que `analyzer..` no importe paquetes de Spring, JPA, AMQP ni Spring AI.
@@ -107,7 +107,7 @@
     - Verificar inyección por constructor general en el proyecto.
   - **Cubre:** R34, R35, R36.
 
-- [ ] **T14 — Ejecución de verificación completa del build (`./mvnw clean verify`).**
+- [x] **T14 — Ejecución de verificación completa del build (`./mvnw clean verify`).**
   - Ejecutar `PROFILE=local JAVA_HOME=/usr/lib/jvm/java-17-openjdk ./mvnw clean verify`.
   - Confirmar `BUILD SUCCESS` con 100% de pruebas unitarias, de integración y de arquitectura pasando en verde.
   - **Cubre:** R37.

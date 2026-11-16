@@ -32,6 +32,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -95,7 +96,7 @@ class ConversationAuditIntakeServiceImplTest {
         assertThat(result.auditId()).isNotNull();
         // saveAndFlush llamado dos veces: claim (PENDING) y promoción (PROCESSING)
         verify(auditResultRepository, times(2)).saveAndFlush(any());
-        verify(auditPipelineTrigger).trigger("chat-new");
+        verify(auditPipelineTrigger).trigger(eq("chat-new"), any());
     }
 
     // R30 — duplicado sin reintento: descarte silencioso
@@ -110,7 +111,7 @@ class ConversationAuditIntakeServiceImplTest {
         AuditIntakeResultDto result = service.admit(req, false);
 
         assertThat(result.outcome()).isEqualTo(AuditIntakeOutcome.DUPLICATE_SKIPPED);
-        verify(auditPipelineTrigger, never()).trigger(any());
+        verify(auditPipelineTrigger, never()).trigger(any(), any());
     }
 
     // R28 — DataIntegrityViolationException tratada como duplicado
@@ -153,7 +154,7 @@ class ConversationAuditIntakeServiceImplTest {
         AuditIntakeResultDto result = service.admit(req, true);
 
         assertThat(result.outcome()).isEqualTo(AuditIntakeOutcome.RETRY_ADMITTED);
-        verify(auditPipelineTrigger).trigger("chat-failed");
+        verify(auditPipelineTrigger).trigger(eq("chat-failed"), any());
     }
 
     // R34 — incrementa attempt_count en reintento
@@ -185,7 +186,7 @@ class ConversationAuditIntakeServiceImplTest {
         AuditIntakeResultDto result = service.admit(req, true);
 
         assertThat(result.outcome()).isEqualTo(AuditIntakeOutcome.DUPLICATE_SKIPPED);
-        verify(auditPipelineTrigger, never()).trigger(any());
+        verify(auditPipelineTrigger, never()).trigger(any(), any());
     }
 
     // R13 — validación antes de cualquier escritura
@@ -263,6 +264,6 @@ class ConversationAuditIntakeServiceImplTest {
         service.admit(req, false);
 
         // Solo el trigger (no-op), no hay beans de analyzer que verificar
-        verify(auditPipelineTrigger).trigger("chat-noai");
+        verify(auditPipelineTrigger).trigger(eq("chat-noai"), any());
     }
 }

@@ -68,3 +68,30 @@ Ver detalle completo y matriz de trazabilidad R1–R74 en `progress/impl_aud_get
 ### Estado de `feature_list.json`
 
 `US-02` marcada como `"status": "done"`.
+
+---
+
+## Sesión 2026-11-17 — US-03: aud_detect_gaps (Detectar preguntas sin respuesta)
+
+- **Feature:** US-03 — `aud_detect_gaps`
+- **Spec:** `specs/003-aud_detect_gaps/{requirements,design,tasks}.md`
+- **Implementación:** `progress/impl_aud_detect_gaps.md`
+- **Resultado:** COMPLETO (`BUILD SUCCESS`, 124 tests pasando al 100%, 14 reglas ArchUnit en verde).
+
+### Logros principales
+
+- Migración Flyway `V2__create_audit_gap.sql`, entidad JPA `AuditGap` y repositorio `IAuditGapRepository` con eliminación por `auditId` y relación `@ManyToOne` hacia `AuditResult`.
+- DTOs inmutables: `ConversationTurnDto`, `KnowledgeGapCandidateDto`, `GapAnalysisResponseDto` y `KnowledgeGapItemDto`.
+- Analizador puro de dominio `KnowledgeGapAnalyzer` (100% libre de dependencias de Spring, JPA, AMQP o AI): normalización diacrítica, tokenización con stopwords en español, cálculo Jaccard y deduplicación greedy determinista con preservación del primer `messageId` cronológico y selección de pregunta canónica con mayor contenido informativo.
+- Configuración de Spring AI con starter OpenAI (`spring-ai-starter-model-openai`) conectado a endpoint compatible `/v1` de Ollama, puerto `IKnowledgeGapAiClient` y adaptador `OpenAiKnowledgeGapAdapter` con prompt estructurado, salida JSON y timeout configurable.
+- Refinamiento de `IAuditPipelineTrigger` a `trigger(String chatId, AuditConversationDto conversation)` y creación de `AuditPipelineOrchestratorImpl` con `@Primary`.
+- Servicio transaccional `KnowledgeGapServiceImpl` con reconstrucción de turnos cronológicos usuario-asistente, filtrado de mensajes `SYSTEM`, persistencia en `audit_gap`, actualización en `PROCESSING`, manejo defensivo de reintentos, manejo controlado de fallos de IA marcando `FAILED` con prefijo `[AI_ERROR]` y emisión de log estructurado `etapa=GAP_DETECTION`.
+- 14 reglas de arquitectura ArchUnit en `ArchitectureRulesTest` verificadas, incluyendo pureza de `analyzer..`, confinamiento de Spring AI en `integration.openai..` y prohibición de `@Autowired` en atributos.
+
+### Archivos modificados/creados
+
+Ver detalle completo y matriz de trazabilidad R1–R37 en `progress/impl_aud_detect_gaps.md`.
+
+### Estado de `feature_list.json`
+
+`US-03` marcada como `"status": "done"`.
