@@ -94,4 +94,8 @@ public class AuditResult {
     /** Brechas de conocimiento detectadas (US-03). */
     @OneToMany(mappedBy = "auditResult", cascade = CascadeType.ALL)
     private List<AuditGap> gaps = new ArrayList<>();
+
+    /** Análisis de sentimiento por mensaje (US-04). */
+    @OneToMany(mappedBy = "auditResult", cascade = CascadeType.ALL)
+    private List<AuditSentiment> sentiments = new ArrayList<>();
 }

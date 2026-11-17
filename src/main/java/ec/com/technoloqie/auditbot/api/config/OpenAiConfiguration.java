@@ -1,6 +1,7 @@
 package ec.com.technoloqie.auditbot.api.config;
 
 import ec.com.technoloqie.auditbot.api.analyzer.KnowledgeGapAnalyzer;
+import ec.com.technoloqie.auditbot.api.analyzer.SentimentAnalyzer;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.context.annotation.Bean;
@@ -23,5 +24,10 @@ public class OpenAiConfiguration {
     @Bean
     public KnowledgeGapAnalyzer knowledgeGapAnalyzer() {
         return new KnowledgeGapAnalyzer();
+    }
+
+    @Bean
+    public SentimentAnalyzer sentimentAnalyzer() {
+        return new SentimentAnalyzer();
     }
 }
