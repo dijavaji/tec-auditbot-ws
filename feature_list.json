@@ -58,7 +58,7 @@
         "Se marca la conversación completa con un flag `frustration_detected` si se supera un umbral configurable"
       ],
       "sdd": true,
-      "status": "pending"
+      "status": "history_ready"
     },
     {
       "id": "US-05",
