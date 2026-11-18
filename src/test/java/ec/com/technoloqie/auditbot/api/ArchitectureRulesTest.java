@@ -114,13 +114,26 @@ class ArchitectureRulesTest {
     }
 
     // -------------------------------------------------------------------------
-    // US-03 — reglas de analizadores e integración Spring AI
+    // US-03 / US-04 — reglas de analizadores e integración Spring AI
     // -------------------------------------------------------------------------
 
     @Test
     void shouldKeepKnowledgeGapAnalyzerPure() {
         ArchRule rule = noClasses()
                 .that().resideInAPackage(BASE_PACKAGE + ".analyzer..")
+                .should().dependOnClassesThat().resideInAnyPackage(
+                        "org.springframework..",
+                        "jakarta.persistence..",
+                        "com.rabbitmq..",
+                        "org.springframework.ai..");
+
+        rule.check(importedClasses);
+    }
+
+    @Test
+    void shouldKeepSentimentAnalyzerPure() {
+        ArchRule rule = noClasses()
+                .that().haveSimpleName("SentimentAnalyzer")
                 .should().dependOnClassesThat().resideInAnyPackage(
                         "org.springframework..",
                         "jakarta.persistence..",

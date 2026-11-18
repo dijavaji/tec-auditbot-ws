@@ -51,14 +51,14 @@
 
 ## Fase 3 — Integración OpenAI con Spring AI (Ollama compatible)
 
-- [ ] **T7 — Crear puerto `ISentimentAiClient` y adaptador `OpenAiSentimentAdapter`.**
+- [x] **T7 — Crear puerto `ISentimentAiClient` y adaptador `OpenAiSentimentAdapter`.**
   - Crear `integration/openai/ISentimentAiClient.java`.
   - Crear `integration/openai/OpenAiSentimentAdapter.java` inyectando `ChatClient` y timeout configurable (`auditbot.ai.openai.timeout-seconds`).
   - Implementar formulación de prompt estricto del sistema y batching de mensajes de usuario en una sola llamada structured output hacia `SentimentAnalysisResponseDto`.
   - Confinar el uso de Spring AI exclusivamente al paquete `integration.openai`.
   - **Cubre:** R6, R7, R8, R29, R35.
 
-- [ ] **T8 — Crear pruebas unitarias para el adaptador en `OpenAiSentimentAdapterTest`.**
+- [x] **T8 — Crear pruebas unitarias para el adaptador en `OpenAiSentimentAdapterTest`.**
   - Crear `src/test/java/ec/com/technoloqie/auditbot/api/integration/openai/OpenAiSentimentAdapterTest.java` con Mockito.
   - Mockear el cliente `ChatClient` y verificar la invocación correcta del prompt, deserialización del JSON de salida y captura de timeouts.
   - **Cubre:** R6, R7, R8, R29.
@@ -67,7 +67,7 @@
 
 ## Fase 4 — Servicio de Aplicación y Orquestación del Pipeline
 
-- [ ] **T9 — Crear interfaz `ISentimentAnalysisService` e implementar `SentimentAnalysisServiceImpl`.**
+- [x] **T9 — Crear interfaz `ISentimentAnalysisService` e implementar `SentimentAnalysisServiceImpl`.**
   - Crear `service/ISentimentAnalysisService.java`.
   - Crear `service/impl/SentimentAnalysisServiceImpl.java` anotado con `@Service` y `@Transactional`.
   - Implementar extracción cronológica de mensajes con rol `USER`, exclusión de `SYSTEM`/`ASSISTANT`, y numeración secuencial (`sequenceOrder`).
@@ -77,12 +77,12 @@
   - Implementar manejo de fallos: actualización de `AuditResult` a `status = FAILED`, error truncado a 500 chars con prefijo `[AI_ERROR]`, y log estructurado de etapa.
   - **Cubre:** R1, R2, R3, R4, R5, R22, R23, R24, R25, R26, R30, R31, R32, R33, R36.
 
-- [ ] **T10 — Crear pruebas unitarias en `SentimentAnalysisServiceImplTest`.**
+- [x] **T10 — Crear pruebas unitarias en `SentimentAnalysisServiceImplTest`.**
   - Crear `src/test/java/ec/com/technoloqie/auditbot/api/service/impl/SentimentAnalysisServiceImplTest.java` con Mockito.
   - Verificar: filtrado y ordenación de mensajes de usuario, asignación correlativa de `sequenceOrder`, conversación vacía, persistencia de entidades, actualización de campos en `AuditResult`, idempotencia en reintentos, marcado en `FAILED` ante excepción del cliente LLM y ausencia de texto confidencial en logs.
   - **Cubre:** R1, R2, R3, R4, R5, R22, R23, R24, R25, R26, R30, R31, R32, R33.
 
-- [ ] **T11 — Conectar la etapa en `AuditPipelineOrchestratorImpl` y crear pruebas de orquestación.**
+- [x] **T11 — Conectar la etapa en `AuditPipelineOrchestratorImpl` y crear pruebas de orquestación.**
   - Modificar `service/impl/AuditPipelineOrchestratorImpl.java` para inyectar `ISentimentAnalysisService` e invocarlo tras `knowledgeGapService.analyzeAndPersistGaps` validando que la auditoría no se encuentre en `FAILED`.
   - Crear `src/test/java/ec/com/technoloqie/auditbot/api/service/impl/AuditPipelineOrchestratorImplTest.java` para verificar la ejecución secuencial gaps $\rightarrow$ sentimientos y la detención si gaps falla.
   - **Cubre:** R27, R28.
@@ -91,15 +91,15 @@
 
 ## Fase 5 — Configuración, Arquitectura y Verificación End-to-End
 
-- [ ] **T12 — Incorporar propiedades de configuración en `application.properties`.**
+- [x] **T12 — Incorporar propiedades de configuración en `application.properties`.**
   - Agregar en `src/main/resources/application.properties` las claves: `auditbot.ai.sentiment.frustration-score-threshold=0.70`, `auditbot.ai.sentiment.negative-ratio-threshold=0.40`, `auditbot.ai.sentiment.consecutive-negative-threshold=2`.
   - **Cubre:** R16, R17, R18, R29.
 
-- [ ] **T13 — Actualizar y verificar reglas de arquitectura en `ArchitectureRulesTest`.**
+- [x] **T13 — Actualizar y verificar reglas de arquitectura en `ArchitectureRulesTest`.**
   - Asegurar que `shouldKeepKnowledgeGapAnalyzerPure` se generalice a `shouldKeepAnalyzersPure` cubriendo a `SentimentAnalyzer`.
   - Ejecutar `ArchitectureRulesTest` para corroborar límites arquitectónicos y pureza de analizadores.
   - **Cubre:** R34, R35, R36.
 
-- [ ] **T14 — Verificación completa del build y test suite.**
+- [x] **T14 — Verificación completa del build y test suite.**
   - Ejecutar `./mvnw clean verify` asegurando código de salida 0, 100% pruebas unitarias, de integración y de arquitectura en verde.
   - **Cubre:** R37.

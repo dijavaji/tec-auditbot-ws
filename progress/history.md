@@ -95,3 +95,31 @@ Ver detalle completo y matriz de trazabilidad R1–R37 en `progress/impl_aud_det
 ### Estado de `feature_list.json`
 
 `US-03` marcada como `"status": "done"`.
+
+---
+
+## Sesión 2026-11-17 — US-04: aud_sentiment_analisys (Detectar frustración del usuario)
+
+- **Feature:** US-04 — `aud_sentiment_analisys`
+- **Spec:** `specs/004-aud_sentiment_analisys/{requirements,design,tasks}.md`
+- **Implementación:** `progress/impl_aud_sentiment_analisys.md`
+- **Resultado:** COMPLETO (`BUILD SUCCESS`, 157 tests pasando al 100%, 15 reglas ArchUnit en verde).
+
+### Logros principales
+
+- Migración Flyway `V3__create_audit_sentiment.sql`, enums `SentimentLabel` (`POSITIVE`, `NEUTRAL`, `NEGATIVE`, `FRUSTRATED`), `SentimentTrend` (`IMPROVING`, `WORSENING`, `STABLE`), entidad JPA `AuditSentiment` y repositorio `IAuditSentimentRepository` con búsqueda/eliminación por `auditId` y relación `@ManyToOne` hacia `AuditResult`.
+- DTOs inmutables: `SentimentItemClassificationDto`, `SentimentAnalysisResponseDto`, `ProcessedSentimentDto` y `SentimentEvaluationResultDto`.
+- Analizador puro de dominio `SentimentAnalyzer` (100% libre de dependencias de Spring, JPA, AMQP o AI): ponderación escalar de polaridad, partición determinista de mitades cronológicas para cálculo de $\Delta P$, clasificación de tendencia (`IMPROVING`, `WORSENING`, `STABLE`) y evaluación disyuntiva de frustración (pico $\ge 0.70$, ratio negativo $\ge 40\%$, consecutivos negativos $\ge 2$).
+- Puerto `ISentimentAiClient` y adaptador `OpenAiSentimentAdapter` en `integration.openai` utilizando `ChatClient` de Spring AI con batching de mensajes de usuario en una única llamada, prompt estructurado, control de timeout (`CompletableFuture`) y fallback determinista `NEUTRAL` (score `0.000`) ante omisiones del modelo.
+- Servicio transaccional `SentimentAnalysisServiceImpl` con extracción cronológica de mensajes `USER`, exclusión de `SYSTEM`/`ASSISTANT`, caso borde sin mensajes de usuario (`frustrationDetected = false`, `status = PROCESSING`), persistencia en lote de sentimientos, actualización atómica de `AuditResult`, manejo idempotente en reintentos y captura controlada de errores de IA marcando `FAILED` con mensaje truncado y prefijo `[AI_ERROR]`.
+- Conexión secuencial en `AuditPipelineOrchestratorImpl`: brechas de conocimiento (`US-03`) $\rightarrow$ verificación de estado no fallido $\rightarrow$ análisis de sentimiento (`US-04`).
+- Regla ArchUnit `shouldKeepSentimentAnalyzerPure` agregada en `ArchitectureRulesTest` (15 reglas en verde).
+- Ejecución completa de `./mvnw clean verify` finalizada en verde (157 tests, 0 fallos).
+
+### Archivos modificados/creados
+
+Ver detalle completo y matriz de trazabilidad R1–R37 en `progress/impl_aud_sentiment_analisys.md`.
+
+### Estado de `feature_list.json`
+
+`US-04` marcada como `"status": "done"`.
