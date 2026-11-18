@@ -77,6 +77,10 @@ public class AuditResult {
     @Column(name = "lead_score", precision = 4, scale = 3)
     private BigDecimal leadScore;
 
+    /** Escribe US-05. Motivo explicativo de la oportunidad de venta perdida. */
+    @Column(name = "lost_lead_reason", length = 500)
+    private String lostLeadReason;
+
     /** Escribe US-03. */
     @Column(name = "gaps_count")
     private Integer gapsCount;

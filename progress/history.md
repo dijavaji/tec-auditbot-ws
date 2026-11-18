@@ -123,3 +123,31 @@ Ver detalle completo y matriz de trazabilidad R1–R37 en `progress/impl_aud_sen
 ### Estado de `feature_list.json`
 
 `US-04` marcada como `"status": "done"`.
+
+---
+
+## Sesión 2026-11-18 — US-05: aud_detect_leads (Identificar leads no calificados)
+
+- **Feature:** US-05 — `aud_detect_leads`
+- **Spec:** `specs/005-aud_detect_leads/{requirements,design,tasks}.md`
+- **Implementación:** `progress/impl_aud_detect_leads.md`
+- **Resultado:** COMPLETO (`BUILD SUCCESS`, 186 tests pasando al 100%, 16 reglas ArchUnit en verde).
+
+### Logros principales
+
+- Migración Flyway `V4__add_lost_lead_reason.sql` añadiendo la columna `lost_lead_reason VARCHAR(500) NULL` a `audit_result` y actualización de la entidad JPA `AuditResult`.
+- DTOs inmutables: `LeadAnalysisResponseDto` (salida estructurada de IA) y `LeadEvaluationResultDto` (resultado evaluado por el dominio).
+- Analizador de dominio puro `LeadAnalyzer` (100% libre de frameworks, Spring, JPA, AMQP o Spring AI): regla disyuntiva de oportunidad de venta perdida (`lostLeadDetected = commercialIntent && !closure`), acotamiento (clamping) de `leadScore` en `[0.000, 1.000]`, asignación neutra ante ausencia de interés comercial (`score = 0.000`, `reason = null`), y saneamiento/truncado de `lostLeadReason` a 500 caracteres.
+- Puerto `ILeadDetectionAiClient` y adaptador `OpenAiLeadDetectionAdapter` en `integration.openai` utilizando `ChatClient` de Spring AI con prompt estructurado comercial, control de timeout (`CompletableFuture`), y procesamiento eficiente del diálogo en una única llamada por conversación.
+- Servicio de aplicación transaccional `LeadDetectionServiceImpl`: extracción cronológica descartando mensajes `SYSTEM`, manejo defensivo de casos borde sin mensajes de usuario (`lostLeadDetected = false`, `leadScore = 0.000`, omisión de llamada a IA), persistencia atómica de resultados en `AuditResult` preservando `status = PROCESSING`, manejo idempotente en reintentos y captura controlada de fallos de IA marcando `FAILED` con prefijo `[AI_ERROR]` sin romper el middleware.
+- Incorporación de la etapa 3 en `AuditPipelineOrchestratorImpl`: gaps (`US-03`) $\rightarrow$ sentimiento (`US-04`) $\rightarrow$ leads (`US-05`), omitiendo etapas subsecuentes si alguna previa marca `FAILED`.
+- Regla ArchUnit `shouldKeepLeadAnalyzerPure` añadida en `ArchitectureRulesTest` (16 reglas en verde).
+- Ejecución completa de pruebas `./mvnw test` con 186 tests pasando al 100% (29 tests nuevos para US-05).
+
+### Archivos modificados/creados
+
+Ver detalle completo y matriz de trazabilidad R1–R24 en `progress/impl_aud_detect_leads.md`.
+
+### Estado de `feature_list.json`
+
+`US-05` marcada como `"status": "done"`.

@@ -144,6 +144,19 @@ class ArchitectureRulesTest {
     }
 
     @Test
+    void shouldKeepLeadAnalyzerPure() {
+        ArchRule rule = noClasses()
+                .that().haveSimpleName("LeadAnalyzer")
+                .should().dependOnClassesThat().resideInAnyPackage(
+                        "org.springframework..",
+                        "jakarta.persistence..",
+                        "com.rabbitmq..",
+                        "org.springframework.ai..");
+
+        rule.check(importedClasses);
+    }
+
+    @Test
     void shouldConfineSpringAiInsideOpenAiIntegrationPackage() {
         ArchRule rule = noClasses()
                 .that().resideOutsideOfPackages(

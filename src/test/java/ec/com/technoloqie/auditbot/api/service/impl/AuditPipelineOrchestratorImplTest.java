@@ -5,6 +5,7 @@ import ec.com.technoloqie.auditbot.api.model.AuditResult;
 import ec.com.technoloqie.auditbot.api.model.AuditStatus;
 import ec.com.technoloqie.auditbot.api.repository.IAuditResultRepository;
 import ec.com.technoloqie.auditbot.api.service.IKnowledgeGapService;
+import ec.com.technoloqie.auditbot.api.service.ILeadDetectionService;
 import ec.com.technoloqie.auditbot.api.service.ISentimentAnalysisService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,7 +27,7 @@ import static org.mockito.Mockito.when;
 
 /**
  * Pruebas unitarias para {@link AuditPipelineOrchestratorImpl}.
- * Cubre R27, R28.
+ * Cubre R19, R20.
  */
 @ExtendWith(MockitoExtension.class)
 class AuditPipelineOrchestratorImplTest {
@@ -38,6 +39,9 @@ class AuditPipelineOrchestratorImplTest {
     private ISentimentAnalysisService sentimentAnalysisService;
 
     @Mock
+    private ILeadDetectionService leadDetectionService;
+
+    @Mock
     private IAuditResultRepository auditResultRepository;
 
     private AuditPipelineOrchestratorImpl orchestrator;
@@ -47,14 +51,15 @@ class AuditPipelineOrchestratorImplTest {
         orchestrator = new AuditPipelineOrchestratorImpl(
                 knowledgeGapService,
                 sentimentAnalysisService,
+                leadDetectionService,
                 auditResultRepository
         );
     }
 
-    // R27 — Invocación secuencial: gaps y luego sentimiento cuando gaps finaliza con éxito
+    // Invocación secuencial completa: gaps -> sentiment -> leads cuando todas finalizan con éxito (R19)
     @Test
-    void shouldTriggerSentimentAnalysisAfterSuccessfulGaps() {
-        String chatId = "chat-orch-1";
+    void shouldTriggerAllStagesSequentiallyWhenSuccessful() {
+        String chatId = "chat-orch-full";
         AuditConversationDto conv = new AuditConversationDto(chatId, "asst-1", Instant.now(), null, List.of());
 
         AuditResult successfulResult = new AuditResult();
@@ -65,16 +70,16 @@ class AuditPipelineOrchestratorImplTest {
 
         orchestrator.trigger(chatId, conv);
 
-        InOrder inOrder = Mockito.inOrder(knowledgeGapService, auditResultRepository, sentimentAnalysisService);
+        InOrder inOrder = Mockito.inOrder(knowledgeGapService, sentimentAnalysisService, leadDetectionService);
         inOrder.verify(knowledgeGapService).analyzeAndPersistGaps(eq(chatId), eq(conv));
-        inOrder.verify(auditResultRepository).findByChatId(eq(chatId));
         inOrder.verify(sentimentAnalysisService).analyzeAndPersistSentiment(eq(chatId), eq(conv));
+        inOrder.verify(leadDetectionService).analyzeAndPersistLeads(eq(chatId), eq(conv));
     }
 
-    // R28 — Detención de pipeline si la etapa de gaps falló (marcando AuditResult en FAILED)
+    // Detención de pipeline si la etapa de gaps falló (marcando AuditResult en FAILED) (R20)
     @Test
-    void shouldNotTriggerSentimentAnalysisIfGapsFailed() {
-        String chatId = "chat-orch-failed";
+    void shouldNotTriggerSentimentOrLeadsIfGapsFailed() {
+        String chatId = "chat-orch-failed-gaps";
         AuditConversationDto conv = new AuditConversationDto(chatId, "asst-1", Instant.now(), null, List.of());
 
         AuditResult failedResult = new AuditResult();
@@ -87,5 +92,32 @@ class AuditPipelineOrchestratorImplTest {
 
         verify(knowledgeGapService).analyzeAndPersistGaps(eq(chatId), eq(conv));
         verify(sentimentAnalysisService, never()).analyzeAndPersistSentiment(any(), any());
+        verify(leadDetectionService, never()).analyzeAndPersistLeads(any(), any());
+    }
+
+    // Detención de pipeline si la etapa de sentimiento falló (R20)
+    @Test
+    void shouldNotTriggerLeadsIfSentimentFailed() {
+        String chatId = "chat-orch-failed-sentiment";
+        AuditConversationDto conv = new AuditConversationDto(chatId, "asst-1", Instant.now(), null, List.of());
+
+        AuditResult intermediateSuccess = new AuditResult();
+        intermediateSuccess.setChatId(chatId);
+        intermediateSuccess.setStatus(AuditStatus.PROCESSING);
+
+        AuditResult failedAfterSentiment = new AuditResult();
+        failedAfterSentiment.setChatId(chatId);
+        failedAfterSentiment.setStatus(AuditStatus.FAILED);
+
+        // Primera llamada tras gaps retorna PROCESSING; segunda llamada tras sentiment retorna FAILED
+        when(auditResultRepository.findByChatId(chatId))
+                .thenReturn(Optional.of(intermediateSuccess))
+                .thenReturn(Optional.of(failedAfterSentiment));
+
+        orchestrator.trigger(chatId, conv);
+
+        verify(knowledgeGapService).analyzeAndPersistGaps(eq(chatId), eq(conv));
+        verify(sentimentAnalysisService).analyzeAndPersistSentiment(eq(chatId), eq(conv));
+        verify(leadDetectionService, never()).analyzeAndPersistLeads(any(), any());
     }
 }
