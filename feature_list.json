@@ -71,7 +71,7 @@
         "El resultado incluye un `lead_score` y el motivo por el cual se considera oportunidad perdida"
       ],
       "sdd": true,
-      "status": "pending"
+      "status": "history_ready"
     },
     {
       "id": "US-06",
