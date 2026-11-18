@@ -38,7 +38,7 @@ alwaysApply: true
 | `CHECKPOINTS.md`             | Criterios objetivos de "estado final correcto"                              | Para auto-evaluarte |
 | `ai-specs/doc/spec.md`       | Proceso SDD: EARS notation, los 3 archivos, puerta de aprobación humana     | Antes de redactar o leer un spec |
 | `ai-specs/agents/`           | Definiciones de subagentes (`leader`, `implementer`, `reviewer`)            | Si orquestas trabajo |
-| `ai-specs/skills/`           | Skills reutilizables (`refine-stories`)                                     | Para refinar historias de usuario |
+| `.agents/skill/refine-stories/`| Skills reutilizables (`refine-stories`)                                     | Para refinar historias de usuario |
 | `src/main/java/`             | Código de la aplicación                                                     | Para implementar |
 | `src/test/java/`             | Tests automáticos (JUnit 5, Mockito, Testcontainers)                        | Para verificar |
 | `pom.xml`                    | Dependencias Maven y configuración de build                                 | Si necesitas agregar dependencias |

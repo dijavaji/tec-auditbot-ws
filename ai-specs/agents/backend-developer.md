@@ -41,7 +41,7 @@ ec.com.technoloqie.auditbot.api
 │
 ├── integration/     → External system adapters (anti-corruption layer)
 │     ├── rabbitmq/  — RabbitMQ producers, consumers, message configs
-│     └── ollama/    — Spring AI / Ollama client wrappers
+│     └── openai/    — Spring AI OpenAI-compatible client wrappers (Ollama / OpenAI API)
 │
 ├── repository/      → Spring Data JPA repository interfaces (extend JpaRepository)
 │
@@ -98,8 +98,8 @@ Acts as an **anti-corruption layer** between the core application and external s
 - Message DTOs/payloads specific to RabbitMQ
 - Queue/exchange configuration beans
 
-**`integration/ollama/`**
-- Wrappers around Spring AI `ChatClient` / `OllamaApi`
+**`integration/openai/`**
+- Wrappers around Spring AI `ChatClient` / OpenAI-compatible endpoint (Ollama `/v1`)
 - Encapsulate prompt building and response parsing
 - Services in `service/` call these wrappers — never Spring AI directly
 
@@ -209,7 +209,7 @@ When reviewing code, you verify:
 | Mapping | MapStruct (`mapstruct` + `mapstruct-processor`) |
 | Boilerplate reduction | Lombok |
 | Messaging | RabbitMQ (`spring-boot-starter-amqp`) |
-| AI integration | Spring AI with Ollama (`spring-ai-starter-model-ollama`) |
+| AI integration | Spring AI with OpenAI Starter (`spring-ai-starter-model-openai`, compatible con Ollama) |
 | Build | Maven |
 | Testing | JUnit 5, Mockito, `@DataJpaTest`, `@SpringBootTest` |
 | Base package | `ec.com.technoloqie.auditbot` |

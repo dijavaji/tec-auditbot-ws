@@ -79,9 +79,11 @@ Main principles:
 ## Coding Standards
 
 ## Estilo
-*   **Indentación:** Se utiliza una indentación de 4 espacios. No se deben usar tabulaciones.
+*   **Indentación:** Uso estricto de **Tabulaciones (Tabs)**. No utilizar espacios para indentar.
 *   **Llaves:** Se sigue el estilo K&R, donde la llave de apertura de un bloque (`{`) se coloca en la misma línea que la declaración y la llave de cierre (`}`) en una nueva línea.
 *   **Longitud de Línea:** Las líneas de código deben ser de una longitud razonable para facilitar la lectura, preferiblemente no excediendo los 120 caracteres.
+*	**Finales de Línea (EOL):** Estándar de Linux (**LF** - `\n`).
+*	**Codificación:** **UTF-8**
 *   **Espacios en Blanco:**
     *   Se deben usar espacios alrededor de los operadores (`=`, `+`, `-`, `*`, `/`, `==`, `!=`, `>`, `<`, `>=`, `<=`, `&&`, `||`).
     *   Se debe usar un espacio después de las comas en las listas de parámetros, declaraciones de variables, etc.
