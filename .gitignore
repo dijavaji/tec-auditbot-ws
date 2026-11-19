@@ -34,3 +34,6 @@ build/
 
 ### Temporary skill outputs ###
 tmp/
+
+#agrego por credenciales
+src/main/resources/application-*.properties
