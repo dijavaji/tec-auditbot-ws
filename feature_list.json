@@ -75,6 +75,19 @@
     },
     {
       "id": "US-06",
+      "name": "pub_aud_msg",
+      "title": "Publicación de Auditoría de Chat vía REST",
+      "description": "Como Desarrollador / Arquitecto de Seguridad Quiero Que el backend auditbot exponga un canal de recepción (endpoint REST) y se encargue de publicar el evento de auditoría directamente en el exchange auditbot.exchange de RabbitMQ Para Evitar problemas de CORS en el navegador y eliminar la exposición de credenciales sensibles de RabbitMQ en el frontend.",
+      "acceptance": [
+        "Recepción segura del payload: El backend debe exponer un destino (POST /api/v1/audits/conversations) que reciba la conversación completa (identificadores chatId, assistantId, timestamps startedAt/endedAt y arreglo de messages) validando la sesión o token del usuario autenticado.",
+        "Publicación y enrutamiento en RabbitMQ: El backend debe publicar el mensaje en el exchange auditbot.exchange con el routing key conversation.audit.requested, propiedades content_type: application/json y delivery_mode: 2 (persistente), utilizando las credenciales configuradas de forma segura en las variables de entorno del servidor.",
+        "Manejo de errores y confirmación al cliente: En caso de éxito, el backend debe retornar una confirmación inmediata (HTTP 200/202); si la conexión o publicación en RabbitMQ falla, debe registrar el error en logs del servidor y responder con un código/mensaje de error controlado sin afectar la sesión del chat."
+      ],
+      "sdd": true,
+      "status": "done"
+    },
+    {
+      "id": "US-07",
       "name": "aud_automatic_upturn",
       "title": "Generar recomendaciones de mejora",
       "description": "**Como** product owner del chatbot **Quiero** recibir sugerencias automáticas de nuevas FAQs o flujos alternativos **Para** reducir gaps y frustración futura sin análisis manual",
@@ -87,7 +100,7 @@
       "status": "pending"
     },
     {
-      "id": "US-07",
+      "id": "US-08",
       "name": "aud_get_audit",
       "title": "Consultar resultados de auditoría vía REST",
       "description": "**Como** frontend React (dashboard) **Quiero** consultar los resultados de auditoría de una o varias conversaciones vía API REST **Para** mostrarlos en el dashboard sin necesidad de suscribirme a eventos",
@@ -100,7 +113,7 @@
       "status": "pending"
     },
     {
-      "id": "US-08",
+      "id": "US-09",
       "name": "aud_view_audit",
       "title": "Ver estado de procesamiento",
       "description": "**Como** usuario del dashboard **Quiero** ver si una conversación ya fue auditada, está en proceso o falló **Para** entender el estado del análisis sin ambigüedad",

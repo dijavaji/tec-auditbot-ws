@@ -41,6 +41,15 @@ class ArchitectureRulesTest {
     }
 
     @Test
+    void shouldEnforceControllerLayerBoundariesForAuditSubmission() {
+        ArchRule rule = com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes()
+                .that().haveSimpleName("AuditChatRestController")
+                .should().dependOnClassesThat().haveSimpleName("IConversationAuditSubmissionService");
+
+        rule.check(importedClasses);
+    }
+
+    @Test
     void shouldKeepRabbitMqTypesInsideAdapterBoundary() {
         ArchRule rule = noClasses()
                 .that().resideOutsideOfPackages(
