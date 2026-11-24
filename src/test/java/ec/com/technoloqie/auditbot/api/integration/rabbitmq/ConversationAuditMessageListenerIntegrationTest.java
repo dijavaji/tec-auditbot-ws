@@ -17,7 +17,10 @@ import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import ec.com.technoloqie.auditbot.api.service.IAuditPipelineTrigger;
+import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
@@ -57,12 +60,16 @@ class ConversationAuditMessageListenerIntegrationTest {
     @Autowired private RabbitTemplate rabbitTemplate;
     @Autowired private AuditMessagingProperties properties;
     @Autowired private IAuditResultRepository auditResultRepository;
+    @MockitoBean private IAuditPipelineTrigger auditPipelineTrigger;
 
     private final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
 
     @AfterEach
     void cleanUp() {
         auditResultRepository.deleteAll();
+        RabbitAdmin admin = new RabbitAdmin(rabbitTemplate.getConnectionFactory());
+        admin.purgeQueue(properties.getDeadLetterQueue(), false);
+        admin.purgeQueue(properties.getQueue(), false);
     }
 
     private ConversationAuditRequestDto buildRequest(String chatId) {
@@ -173,6 +180,7 @@ class ConversationAuditMessageListenerIntegrationTest {
     // R30, R31 — chatId duplicado descartado sin ir a DLQ
     @Test
     void shouldNotReprocessDuplicatedChatId() throws Exception {
+        while (rabbitTemplate.receive(properties.getDeadLetterQueue(), 200) != null) { /* drain */ }
         String chatId = "chat-dup-e2e-" + UUID.randomUUID();
         ConversationAuditRequestDto req = buildRequest(chatId);
 

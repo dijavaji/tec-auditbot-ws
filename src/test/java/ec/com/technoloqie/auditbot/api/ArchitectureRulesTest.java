@@ -105,11 +105,65 @@ class ArchitectureRulesTest {
     @Test
     void shouldKeepConsumptionIndependentFromAnalyzers() {
         ArchRule rule = noClasses()
-                .that().resideInAnyPackage(
-                        BASE_PACKAGE + ".integration.rabbitmq..",
-                        BASE_PACKAGE + ".service..")
+                .that().resideInAPackage(BASE_PACKAGE + ".integration.rabbitmq..")
+                .or().haveSimpleName("ConversationAuditIntakeServiceImpl")
                 .should().dependOnClassesThat().resideInAnyPackage(
                         BASE_PACKAGE + ".analyzer..");
+
+        rule.check(importedClasses);
+    }
+
+    // -------------------------------------------------------------------------
+    // US-03 / US-04 — reglas de analizadores e integración Spring AI
+    // -------------------------------------------------------------------------
+
+    @Test
+    void shouldKeepKnowledgeGapAnalyzerPure() {
+        ArchRule rule = noClasses()
+                .that().resideInAPackage(BASE_PACKAGE + ".analyzer..")
+                .should().dependOnClassesThat().resideInAnyPackage(
+                        "org.springframework..",
+                        "jakarta.persistence..",
+                        "com.rabbitmq..",
+                        "org.springframework.ai..");
+
+        rule.check(importedClasses);
+    }
+
+    @Test
+    void shouldKeepSentimentAnalyzerPure() {
+        ArchRule rule = noClasses()
+                .that().haveSimpleName("SentimentAnalyzer")
+                .should().dependOnClassesThat().resideInAnyPackage(
+                        "org.springframework..",
+                        "jakarta.persistence..",
+                        "com.rabbitmq..",
+                        "org.springframework.ai..");
+
+        rule.check(importedClasses);
+    }
+
+    @Test
+    void shouldKeepLeadAnalyzerPure() {
+        ArchRule rule = noClasses()
+                .that().haveSimpleName("LeadAnalyzer")
+                .should().dependOnClassesThat().resideInAnyPackage(
+                        "org.springframework..",
+                        "jakarta.persistence..",
+                        "com.rabbitmq..",
+                        "org.springframework.ai..");
+
+        rule.check(importedClasses);
+    }
+
+    @Test
+    void shouldConfineSpringAiInsideOpenAiIntegrationPackage() {
+        ArchRule rule = noClasses()
+                .that().resideOutsideOfPackages(
+                        BASE_PACKAGE + ".integration.openai..",
+                        BASE_PACKAGE + ".config..")
+                .should().dependOnClassesThat().resideInAnyPackage(
+                        "org.springframework.ai..");
 
         rule.check(importedClasses);
     }
@@ -156,6 +210,14 @@ class ArchitectureRulesTest {
         ArchRule rule = com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes()
                 .that().haveSimpleName("ConversationAuditIntakeServiceImpl")
                 .should().dependOnClassesThat().haveSimpleName("ConversationAuditRequestValidator");
+
+        rule.check(importedClasses);
+    }
+
+    @Test
+    void shouldEnforceConstructorInjection() {
+        ArchRule rule = com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noFields()
+                .should().beAnnotatedWith("org.springframework.beans.factory.annotation.Autowired");
 
         rule.check(importedClasses);
     }

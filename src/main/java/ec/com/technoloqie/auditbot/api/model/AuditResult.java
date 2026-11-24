@@ -1,10 +1,12 @@
 package ec.com.technoloqie.auditbot.api.model;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import lombok.Getter;
@@ -13,6 +15,8 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Registro de control de una auditoría de conversación.
@@ -73,6 +77,10 @@ public class AuditResult {
     @Column(name = "lead_score", precision = 4, scale = 3)
     private BigDecimal leadScore;
 
+    /** Escribe US-05. Motivo explicativo de la oportunidad de venta perdida. */
+    @Column(name = "lost_lead_reason", length = 500)
+    private String lostLeadReason;
+
     /** Escribe US-03. */
     @Column(name = "gaps_count")
     private Integer gapsCount;
@@ -86,4 +94,12 @@ public class AuditResult {
     /** Escribe el pipeline al completar. */
     @Column(name = "audited_date")
     private Instant auditedDate;
+
+    /** Brechas de conocimiento detectadas (US-03). */
+    @OneToMany(mappedBy = "auditResult", cascade = CascadeType.ALL)
+    private List<AuditGap> gaps = new ArrayList<>();
+
+    /** Análisis de sentimiento por mensaje (US-04). */
+    @OneToMany(mappedBy = "auditResult", cascade = CascadeType.ALL)
+    private List<AuditSentiment> sentiments = new ArrayList<>();
 }

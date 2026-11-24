@@ -45,7 +45,7 @@
         "El resultado incluye el texto de la pregunta y un score de confianza de la clasificación"
       ],
       "sdd": true,
-      "status": "history_ready"
+      "status": "done"
     },
     {
       "id": "US-04",
@@ -58,7 +58,7 @@
         "Se marca la conversación completa con un flag `frustration_detected` si se supera un umbral configurable"
       ],
       "sdd": true,
-      "status": "pending"
+      "status": "done"
     },
     {
       "id": "US-05",
@@ -71,7 +71,7 @@
         "El resultado incluye un `lead_score` y el motivo por el cual se considera oportunidad perdida"
       ],
       "sdd": true,
-      "status": "pending"
+      "status": "done"
     },
     {
       "id": "US-06",
