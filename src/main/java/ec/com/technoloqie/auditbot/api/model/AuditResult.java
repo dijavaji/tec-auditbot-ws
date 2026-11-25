@@ -102,4 +102,8 @@ public class AuditResult {
     /** Análisis de sentimiento por mensaje (US-04). */
     @OneToMany(mappedBy = "auditResult", cascade = CascadeType.ALL)
     private List<AuditSentiment> sentiments = new ArrayList<>();
+
+    /** Recomendaciones de mejora generadas (US-07). */
+    @OneToMany(mappedBy = "auditResult", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<AuditRecommendation> recommendations = new ArrayList<>();
 }

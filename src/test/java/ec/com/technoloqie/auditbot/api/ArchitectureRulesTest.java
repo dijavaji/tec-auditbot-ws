@@ -166,6 +166,19 @@ class ArchitectureRulesTest {
     }
 
     @Test
+    void shouldKeepRecommendationAnalyzerPure() {
+        ArchRule rule = noClasses()
+                .that().haveSimpleName("RecommendationAnalyzer")
+                .should().dependOnClassesThat().resideInAnyPackage(
+                        "org.springframework..",
+                        "jakarta.persistence..",
+                        "com.rabbitmq..",
+                        "org.springframework.ai..");
+
+        rule.check(importedClasses);
+    }
+
+    @Test
     void shouldConfineSpringAiInsideOpenAiIntegrationPackage() {
         ArchRule rule = noClasses()
                 .that().resideOutsideOfPackages(
