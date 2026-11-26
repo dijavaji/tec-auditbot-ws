@@ -151,3 +151,32 @@ Ver detalle completo y matriz de trazabilidad R1–R24 en `progress/impl_aud_det
 ### Estado de `feature_list.json`
 
 `US-05` marcada como `"status": "done"`.
+
+---
+
+## Sesión 2026-11-25 — US-06: pub_aud_msg (Publicación de Auditoría de Chat vía REST)
+
+- **Feature:** US-06 — `pub_aud_msg`
+- **Spec:** `specs/006-pub_aud_msg/{requirements,design,tasks}.md`
+- **Implementación:** `progress/impl_pub_aud_msg.md`
+- **Revisión:** `progress/review_pub_aud_msg.md`
+- **Resultado:** COMPLETO (`BUILD SUCCESS`, 202 tests pasando al 100%, 17 reglas ArchUnit en verde).
+
+### Logros principales
+
+- DTOs inmutables: `ConversationAuditSubmissionResponseDto` para confirmación HTTP 202 Accepted y `ApiErrorResponseDto` para respuestas estructuradas de error con `invalidFields`.
+- Puerto `IConversationAuditSubmissionService` y su implementación `ConversationAuditSubmissionServiceImpl`: ensamblado del envelope `ConversationAuditRequestDto` con `schemaVersion = "1.0"`, UUID único, timestamp UTC y `producer`, validación mediante `ConversationAuditRequestValidator`, publicación hacia RabbitMQ mediante `IConversationAuditPublisher.publish()`, y logging estructurado (`etapa=REST_AUDIT_SUBMISSION`).
+- Componentes de seguridad JWT: utilitario `JwtTokenValidator` (HMAC-SHA con clave configurable) y filtro `JwtAuthenticationFilter` (`OncePerRequestFilter` con registro en `SecurityContextRepository`).
+- `SecurityConfiguration`: `SecurityFilterChain` con CSRF desactivado para rutas API, políticas CORS hacia `${ec.com.technoloqie.chatbot.app.url}` para `GET, POST, OPTIONS`, sesiones stateless, protección de `POST /api/v1/audits/conversations` (autenticado) y acceso público a `GET /api/v1/audits`, con `AuthenticationEntryPoint` retornando `HTTP 401 Unauthorized` en JSON.
+- Controlador `AuditChatRestController` actualizado con endpoint `POST /conversations` delegando limpiamente al servicio de aplicación y retornando `HTTP 202 Accepted`.
+- Manejador `@RestControllerAdvice` (`AuditChatControllerAdvice`) mapeando `InvalidAuditRequestException` a `400 Bad Request`, `AuditPublicationException` a `502 Bad Gateway`, errores de JSON a `400 Bad Request` y errores inesperados a `500 Internal Server Error`.
+- Regla ArchUnit `shouldEnforceControllerLayerBoundariesForAuditSubmission` en `ArchitectureRulesTest` asegurando que el controlador delega a `IConversationAuditSubmissionService` sin acoplamiento a RabbitMQ ni tipos AMQP directos.
+- Ejecución integral de `./mvnw clean verify`: 202 tests ejecutados y pasando al 100% (16 tests nuevos para US-06).
+
+### Archivos modificados/creados
+
+Ver detalle completo y matriz de trazabilidad R1–R22 en `progress/impl_pub_aud_msg.md`.
+
+### Estado de `feature_list.json`
+
+`US-06` marcada como `"status": "done"`.
