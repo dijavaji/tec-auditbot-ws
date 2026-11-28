@@ -180,3 +180,34 @@ Ver detalle completo y matriz de trazabilidad R1–R22 en `progress/impl_pub_aud
 ### Estado de `feature_list.json`
 
 `US-06` marcada como `"status": "done"`.
+
+---
+
+## Sesión 2026-11-26 — US-07: aud_automatic_upturn (Generar recomendaciones de mejora)
+
+- **Feature:** US-07 — `aud_automatic_upturn`
+- **Spec:** `specs/007-aud_automatic_upturn/{requirements,design,tasks}.md`
+- **Implementación:** `progress/impl_aud_automatic_upturn.md`
+- **Resultado:** COMPLETO (`BUILD SUCCESS`, 225 tests pasando al 100%, 18 reglas ArchUnit en verde).
+
+### Logros principales
+
+- Migración Flyway `V5__create_audit_recommendation.sql` creando la tabla `audit_recommendation` con relación en cascada sobre `audit_result(audit_id)` e índice correspondiente.
+- Enum `RecommendationType` (`NEW_FAQ`, `ALTERNATIVE_FLOW`), entidad JPA `AuditRecommendation` y mapeo `@OneToMany` inverso en el agregado raíz `AuditResult`.
+- Repositorio Spring Data JPA `IAuditRecommendationRepository` con métodos `findByAuditResult_AuditId` y `deleteByAuditResult_AuditId`.
+- DTOs inmutables: `AuditFindingsContextDto`, `RecommendationCandidateDto`, `RecommendationAnalysisResponseDto`, `RecommendationItemDto` y `RecommendationEvaluationResultDto`.
+- Analizador puro de dominio `RecommendationAnalyzer` (100% libre de frameworks, Spring, JPA, AMQP o Spring AI): normalización case-insensitive y filtrado de tipos, saneamiento/trim de textos sugeridos con descarte de vacíos, validación de `originMessageId` contra mensajes reales del diálogo y deduplicación determinista.
+- Puerto `IRecommendationAiClient` y adaptador `OpenAiRecommendationAdapter` en `integration.openai` utilizando `ChatClient` de Spring AI con prompt de consultoría para `NEW_FAQ` y `ALTERNATIVE_FLOW`, estructuración JSON y control de timeout (`CompletableFuture`).
+- Servicio de aplicación transaccional `RecommendationServiceImpl`: consolidación de hallazgos previos, exclusión de mensajes `SYSTEM`, atajo eficiente para conversaciones sin hallazgos adversos (0 recomendaciones y promoción a `COMPLETED`), eliminación previa en caso de reintentos para idempotencia, persistencia en lote de recomendaciones, culminación oficial del pipeline de auditoría estableciendo `status = COMPLETED`, `audited_date = Instant.now()`, `updated_date = Instant.now()`, y manejo resiliente de fallos de IA marcando `status = FAILED` con prefijo `[AI_ERROR]`.
+- Incorporación de la etapa 4 en `AuditPipelineOrchestratorImpl`: gaps (`US-03`) $\rightarrow$ sentimiento (`US-04`) $\rightarrow$ leads (`US-05`) $\rightarrow$ recomendaciones y culminación (`US-07`), con omisión si alguna etapa previa falla.
+- Regla ArchUnit `shouldKeepRecommendationAnalyzerPure` añadida en `ArchitectureRulesTest` (18 reglas verificadas y en verde).
+- Ejecución de pruebas con 225 tests pasando al 100% (23 tests nuevos para US-07).
+
+### Archivos modificados/creados
+
+Ver detalle completo y matriz de trazabilidad R1–R23 en `progress/impl_aud_automatic_upturn.md`.
+
+### Estado de `feature_list.json`
+
+`US-07` marcada como `"status": "done"`.
+

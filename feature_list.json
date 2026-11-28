@@ -97,7 +97,7 @@
         "Las recomendaciones se persisten asociadas al `chatId` de origen"
       ],
       "sdd": true,
-      "status": "pending"
+      "status": "done"
     },
     {
       "id": "US-08",

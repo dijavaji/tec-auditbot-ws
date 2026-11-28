@@ -2,6 +2,7 @@ package ec.com.technoloqie.auditbot.api.config;
 
 import ec.com.technoloqie.auditbot.api.analyzer.KnowledgeGapAnalyzer;
 import ec.com.technoloqie.auditbot.api.analyzer.LeadAnalyzer;
+import ec.com.technoloqie.auditbot.api.analyzer.RecommendationAnalyzer;
 import ec.com.technoloqie.auditbot.api.analyzer.SentimentAnalyzer;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.openai.OpenAiChatOptions;
@@ -35,5 +36,10 @@ public class OpenAiConfiguration {
     @Bean
     public LeadAnalyzer leadAnalyzer() {
         return new LeadAnalyzer();
+    }
+
+    @Bean
+    public RecommendationAnalyzer recommendationAnalyzer() {
+        return new RecommendationAnalyzer();
     }
 }
